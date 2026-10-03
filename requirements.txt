@@ -1,5 +1,10 @@
 # Core engine has zero external dependencies -- pure stdlib Python 3.11+.
-# These are only needed once you add the API layer / tests:
+# API layer / tests:
 fastapi
 uvicorn[standard]
 pytest
+# Slack adapter:
+slack-bolt>=1.20
+slack-sdk>=3.33
+pydantic>=2.8
+python-dotenv>=1.0
