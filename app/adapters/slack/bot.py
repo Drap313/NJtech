@@ -25,19 +25,20 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from app.adapters.slack import renderer
 from app.agent.loop import AgentLoop
 from app.audit.log import audit
-from app.core.client import CoreClient, FakeCore
+from app.core.client import CoreClient
+from app.core.real_client import RealCore
 from app.core.models import IncidentStatus
 
 load_dotenv()
 
-core: CoreClient = FakeCore()  # swap for HTTPCore when the GB10 API is up
+core: CoreClient = RealCore()  # live engine: evaluate_assignment + find_costed_alternatives
 agent = AgentLoop(core)
 
 app = App(token=os.environ["SLACK_BOT_TOKEN"])
 
 
 def post_incident(client, channel: str) -> None:
-    incident = core.open_demo_incident()  # type: ignore[attr-defined]
+    incident = core.open_incident_for_assignment("ramirez", "4417")  # TODO: parse driver/load from the Slack message instead of hardcoding
     response = client.chat_postMessage(
         channel=channel,
         text=f"Incident {incident.incident_id}: {incident.summary}",
