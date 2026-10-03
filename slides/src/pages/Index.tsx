@@ -33,14 +33,6 @@ const industryCards = [
     shadowClassName: 'shadow-[0_30px_80px_rgba(95,214,228,0.12)]',
   },
   {
-    number: 'Under 1%',
-    text: 'Operating margin on a record $2.336 per mile to run a truck. Enormous revenue, almost nothing kept.',
-    citation: '(ATRI Operational Costs of Trucking, 2025).',
-    numberClassName: 'text-[#e4b24d]',
-    borderClassName: 'border-[#e4b24d]/25',
-    shadowClassName: 'shadow-[0_30px_80px_rgba(228,178,77,0.12)]',
-  },
-  {
     number: '$108.8B',
     text: 'Lost to delay every year — $7,588 of it per truck, before a single fine or claim.',
     citation: '(ATRI Cost of Congestion; record high, +15% year over year).',
@@ -404,10 +396,10 @@ const Index = () => {
               viewport={{ once: false, amount: 0.35 }}
               className="mx-auto max-w-5xl text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
             >
-              Enormous industry. <span className="text-destructive">Almost no margin.</span>
+              Enormous industry. <span className="text-destructive">Enormous leakage.</span>
             </motion.h2>
 
-            <div className="grid max-w-6xl mx-auto gap-4 md:grid-cols-3">
+            <div className="grid max-w-5xl mx-auto gap-5 md:grid-cols-2">
               {industryCards.map((card, index) => (
                 <motion.div
                   key={card.number}
@@ -430,7 +422,6 @@ const Index = () => {
 
             <p className="text-center text-base md:text-lg text-muted-foreground max-w-4xl mx-auto">
               Another <span className="text-foreground">$11.5B</span> goes to detention at the dock.
-              In an industry this thin, delay is the margin.
             </p>
           </div>
         </Section>
@@ -566,61 +557,63 @@ const Index = () => {
           </div>
         </Section>
 
-        <Section id="demo" className="bg-transparent" contentClassName="max-w-7xl py-6">
-          <div className="space-y-5">
+        <Section id="demo" className="bg-transparent" contentClassName="max-w-7xl py-5">
+          <div className="space-y-4">
             <h2 className="text-center text-4xl font-black tracking-tight text-foreground md:text-6xl">
               Demo
             </h2>
 
-            <div className="mx-auto max-w-6xl">
+            <div className="mx-auto w-full max-w-3xl lg:max-w-4xl">
               <ScreenshotSlot
-                label="Overlay view — the whole operation at once"
+                label="Overview — the whole operation at once"
                 src="/demo-overlay.png"
-                className="h-[17rem] md:h-[21rem]"
+                className="aspect-video"
               />
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2 max-w-6xl mx-auto">
+            <div className="grid gap-4 md:grid-cols-2 max-w-5xl mx-auto">
               <ScreenshotSlot
                 label="Drivers"
                 src="/demo-drivers.png"
                 caption="Rosters, hours worked, legal limits"
-                className="h-[11rem] md:h-[13rem]"
+                className="aspect-video"
               />
               <ScreenshotSlot
                 label="Loads"
                 src="/demo-loads.png"
                 caption="Active, upcoming, and their deadlines"
-                className="h-[11rem] md:h-[13rem]"
+                className="aspect-video"
               />
             </div>
           </div>
         </Section>
 
-        <Section id="approval" className="bg-transparent" contentClassName="max-w-7xl py-6">
-          <div className="space-y-5">
+        <Section id="approval" className="bg-transparent" contentClassName="max-w-7xl py-5">
+          <div className="space-y-4">
             <h2 className="text-center text-3xl font-black tracking-tight text-foreground md:text-5xl">
-              Incident, options, <span className="text-primary">approval</span>.
+              A 75-minute delay, <span className="text-primary">priced three ways</span>.
             </h2>
 
-            <div className="grid gap-5 md:grid-cols-3 max-w-7xl mx-auto">
+            <div className="mx-auto w-full max-w-3xl lg:max-w-4xl">
+              <ScreenshotSlot
+                label="Schedule — every driver's projected day, and the incident on it"
+                src="/demo-schedule.png"
+                className="aspect-video"
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2 max-w-5xl mx-auto">
               <ScreenshotSlot
                 label="Incident detail"
                 src="/demo-incident.png"
-                caption="What broke, and which clock"
-                className="h-[17rem] md:h-[21rem]"
+                caption="41 minutes over the 14-hour window"
+                className="aspect-video"
               />
               <ScreenshotSlot
-                label="Incident options"
+                label="Options compared"
                 src="/demo-options.png"
-                caption="+$1,200 to stay on the original plan"
-                className="h-[17rem] md:h-[21rem]"
-              />
-              <ScreenshotSlot
-                label="Slack approval"
-                src="/demo-slack.png"
-                caption="Approved without leaving Slack"
-                className="h-[17rem] md:h-[21rem]"
+                caption="Relay $286 · swap $411 · hold $1,200"
+                className="aspect-video"
               />
             </div>
           </div>
