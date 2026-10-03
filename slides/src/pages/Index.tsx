@@ -165,7 +165,7 @@ const Index = () => {
 
   const teamMembers = [
     { name: 'Max Martinez', role: 'Mechanical Engineering', initials: 'M', image: '/Max_Headshot.webp', school: 'New Jersey Institute of Technology' },
-    { name: 'Yahil Corcino', role: 'Computer Engineering', initials: 'Y', image: '/Yahil_Headshot.webp', school: 'New Jersey Institute of Technology', prev: 'prev Eng Intern @ Eight Sleep' },
+    { name: 'Yahil Corcino', role: 'Computer Engineering', initials: 'Y', image: '/Yahil_Headshot.webp', school: 'New Jersey Institute of Technology' },
     { name: 'David Rapozo', role: 'Computer Engineering', initials: 'DR', image: '/David_Headshot.jpeg', school: 'New Jersey Institute of Technology' },
   ];
 
@@ -309,12 +309,6 @@ const Index = () => {
                           <p className="mt-2 text-sm font-bold tracking-wide text-foreground">
                             {member.school}
                           </p>
-                          {'prev' in member && member.prev && (
-                            <p className="mt-1.5 text-xs tracking-wide text-muted-foreground">
-                              <span className="text-muted-foreground/50">| </span>
-                              {member.prev}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </LinesPatternCardBody>
