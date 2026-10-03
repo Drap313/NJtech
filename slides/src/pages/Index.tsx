@@ -157,6 +157,8 @@ const Index = () => {
   const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState('home');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const activeSectionRef = useRef(activeSection);
+  activeSectionRef.current = activeSection;
 
   const teamMembers = [
     { name: 'Max Martinez', role: 'Mechanical Engineering', initials: 'M', image: '/Max_Headshot.webp', school: 'New Jersey Institute of Technology' },
@@ -196,6 +198,53 @@ const Index = () => {
       element.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Keyboard / presentation-clicker navigation between slides.
+  useEffect(() => {
+    const NEXT_KEYS = ['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Spacebar'];
+    const PREV_KEYS = ['ArrowLeft', 'ArrowUp', 'PageUp'];
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')) {
+        return;
+      }
+
+      const isNext = NEXT_KEYS.includes(event.key);
+      const isPrev = PREV_KEYS.includes(event.key);
+      const isFirst = event.key === 'Home';
+      const isLast = event.key === 'End';
+      if (!isNext && !isPrev && !isFirst && !isLast) return;
+
+      // Resolve the current slide from scroll position so a held key can't
+      // outrun the scroll listener and skip a slide.
+      const container = scrollContainerRef.current;
+      let currentIndex = SECTION_IDS.indexOf(activeSectionRef.current);
+      if (container) {
+        const mid = container.scrollTop + container.clientHeight / 2;
+        const atMid = SECTION_IDS.findIndex((id) => {
+          const el = document.getElementById(id);
+          return el ? mid >= el.offsetTop && mid < el.offsetTop + el.offsetHeight : false;
+        });
+        if (atMid !== -1) currentIndex = atMid;
+      }
+      if (currentIndex === -1) currentIndex = 0;
+
+      let nextIndex = currentIndex;
+      if (isNext) nextIndex = Math.min(currentIndex + 1, SECTION_IDS.length - 1);
+      if (isPrev) nextIndex = Math.max(currentIndex - 1, 0);
+      if (isFirst) nextIndex = 0;
+      if (isLast) nextIndex = SECTION_IDS.length - 1;
+
+      event.preventDefault();
+      if (nextIndex !== currentIndex) scrollToSection(SECTION_IDS[nextIndex]);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="relative min-h-screen">
