@@ -2,11 +2,18 @@
 sourced from the real engine (app.feasibility / app.optimization /
 app.fleet_state) instead of fixtures. Subclasses FakeCore to reuse its
 execute_approved_plan / record_override / get_incident logic verbatim --
-that logic is generic and never touches fixtures directly."""
+that logic is generic and never touches fixtures directly.
+
+Two clocks on purpose: fs.now is the SIMULATED fleet-state time the
+synthetic data was authored against (e.g. 02:00 on a demo scenario), used
+for all HOS/feasibility math. real_now is actual wall-clock UTC time, used
+for anything FakeCore later compares against datetime.now(timezone.utc) --
+specifically incident.expires_at in execute_approved_plan. Mixing these up
+is what caused incidents to read as already-expired."""
 from __future__ import annotations
 
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.core.client import FakeCore
 from app.core.models import (
@@ -19,6 +26,7 @@ from app.optimization.alternatives import find_costed_alternatives
 
 _VERDICT_MAP = {"legal": Verdict.PASS, "illegal": Verdict.FAIL, "manual_review": Verdict.MANUAL_REVIEW}
 INCIDENT_TTL_MINUTES = 12
+
 
 class RealCore(FakeCore):
     def __init__(self, fleet_state: FleetState | None = None) -> None:
@@ -44,7 +52,7 @@ class RealCore(FakeCore):
             input_freshness=input_freshness,
         )
 
-    def _plan_to_model(self, plan: dict, incident_id: str, load, now: datetime) -> RecoveryPlan:
+    def _plan_to_model(self, plan: dict, incident_id: str, load, real_now: datetime) -> RecoveryPlan:
         delay = plan.get("delivery_delay_minutes") or 0
         delivery_eta = load.delivery_window_end + timedelta(minutes=delay) if delay else load.delivery_window_end
         title_map = {
@@ -69,7 +77,7 @@ class RealCore(FakeCore):
                                            amount_usd=plan.get("added_cost", 0.0))],
             risk_score=plan.get("schedule_risk_score", 0),
             assumptions=[],
-            expires_at=now + timedelta(minutes=INCIDENT_TTL_MINUTES),
+            expires_at=real_now + timedelta(minutes=INCIDENT_TTL_MINUTES),
         )
 
     def open_incident_for_assignment(self, driver_id: str, load_id: str) -> Incident:
@@ -79,9 +87,12 @@ class RealCore(FakeCore):
         vehicle = fs.vehicle(fs.assignments[assignment_id].vehicle_id) if assignment_id else None
         trailer = fs.trailer(fs.assignments[assignment_id].trailer_id) if assignment_id else None
 
+        # Simulated fleet-state time -- what the HOS/feasibility math runs against.
         ev = evaluate_assignment(driver, load, vehicle, trailer, proposed_start=fs.now, now=fs.now)
         compliance_model = self._compliance_to_model(ev["compliance"])
-        now = fs.now
+
+        # Real wall-clock time -- what the Slack-facing approval window runs against.
+        real_now = datetime.now(timezone.utc)
         incident_id = f"DG-I-{load_id}-{secrets.token_hex(3)}"
 
         if ev["legally_compliant"] and ev["operationally_feasible"]:
@@ -90,7 +101,7 @@ class RealCore(FakeCore):
             summary, cause = f"Load {load_id} is clear on hours and fatigue flags.", "No issue detected."
         else:
             raw_plans = find_costed_alternatives(assignment_id, fs) if assignment_id else []
-            plans_models = [self._plan_to_model(p, incident_id, load, now) for p in raw_plans]
+            plans_models = [self._plan_to_model(p, incident_id, load, real_now) for p in raw_plans]
             recommended_id = next((p["plan_id"] for p in raw_plans if p.get("recommended")),
                                    raw_plans[0]["plan_id"] if raw_plans else None)
             severity = IncidentSeverity.HIGH if not ev["legally_compliant"] else IncidentSeverity.MEDIUM
@@ -103,11 +114,11 @@ class RealCore(FakeCore):
             customer_impact="See recommended plan for projected delay.",
             compliance=compliance_model, recommended_plan_id=recommended_id or "",
             plans=plans_models, approval_token=secrets.token_urlsafe(16),
-            created_at=now, expires_at=now + timedelta(minutes=INCIDENT_TTL_MINUTES),
+            created_at=real_now, expires_at=real_now + timedelta(minutes=INCIDENT_TTL_MINUTES),
         )
         self.incidents[incident.incident_id] = incident
         self._traces[incident.incident_id] = [
-            f"{now.isoformat()} evaluate_assignment({driver_id}, {load_id}) -> "
+            f"{fs.now.isoformat()} (simulated) evaluate_assignment({driver_id}, {load_id}) -> "
             f"legal={ev['legally_compliant']} feasible={ev['operationally_feasible']}",
             f"find_costed_alternatives -> {len(plans_models)} ranked option(s)",
             f"recommend {recommended_id}" if recommended_id else "no recommendation (clear)",
