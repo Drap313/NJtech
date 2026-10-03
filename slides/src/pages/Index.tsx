@@ -44,20 +44,31 @@ const industryCards = [
 
 const engineLayers = [
   {
-    title: 'Rules layer',
-    subtitle: 'Deterministic',
-    text: 'The 49 CFR 395.3 clocks, in Python. What is legal is never a guess, and never the model’s job.',
+    index: '01',
+    title: 'Deterministic layer',
+    tech: ['Python 3.11 · zero deps', '49 CFR § 395.3'],
+    text: 'Maximum driving time for property-carrying vehicles — 11-hour drive, 14-hour window, 30-minute break, 34-hour reset, 60/70 cycle. Anything unsupported returns manual_review, never a guess.',
     accentClassName: 'text-primary',
     borderClassName: 'border-primary/30',
     bgClassName: 'bg-primary/10',
   },
   {
+    index: '02',
     title: 'Local model',
-    subtitle: 'Qwen3.6-35B on the GB10',
-    text: 'The operational trade-offs: reroute, reassign, or accept the delay — whichever actually costs less.',
+    tech: ['vLLM · Qwen3.6-35B-A3B NVFP4', 'Dell Pro Max GB10'],
+    text: 'Explains what broke, compares the recovery options, drafts the dispatcher message. Provisioned by NemoClaw. It never decides what is legal.',
     accentClassName: 'text-secondary',
     borderClassName: 'border-secondary/30',
     bgClassName: 'bg-secondary/10',
+  },
+  {
+    index: '03',
+    title: 'Agent and surface',
+    tech: ['NemoClaw / OpenClaw', 'OpenShell', 'Slack Block Kit'],
+    text: 'A typed tool-calling loop under an OpenShell egress policy, approvals in Slack, and an append-only JSONL audit trail.',
+    accentClassName: 'text-accent',
+    borderClassName: 'border-accent/30',
+    bgClassName: 'bg-accent/10',
   },
 ];
 
@@ -516,24 +527,34 @@ const Index = () => {
               viewport={{ once: false, amount: 0.35 }}
               className="mx-auto max-w-5xl text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
             >
-              Two layers. <span className="text-primary">One decision.</span>
+              Three layers. <span className="text-primary">One decision.</span>
             </motion.h2>
 
-            <div className="grid gap-5 md:grid-cols-2 max-w-5xl mx-auto">
+            <div className="flex flex-col gap-3 max-w-5xl mx-auto">
               {engineLayers.map((layer, index) => (
                 <motion.div
                   key={layer.title}
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.12 * index }}
-                  viewport={{ once: false, amount: 0.3 }}
-                  className={`rounded-[1.5rem] border p-6 text-left ${layer.bgClassName} ${layer.borderClassName}`}
+                  transition={{ duration: 0.45, delay: 0.1 * index }}
+                  viewport={{ once: false, amount: 0.25 }}
+                  className={`flex items-start gap-4 rounded-xl border p-4 md:p-5 text-left ${layer.bgClassName} ${layer.borderClassName}`}
                 >
-                  <p className={`text-2xl md:text-3xl font-semibold ${layer.accentClassName}`}>{layer.title}</p>
-                  <p className="mt-1 text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
-                    {layer.subtitle}
-                  </p>
-                  <p className="mt-3 text-base leading-relaxed text-foreground">{layer.text}</p>
+                  <span className={`font-mono text-sm font-bold ${layer.accentClassName}`}>{layer.index}</span>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
+                      <p className={`text-xl md:text-2xl font-semibold ${layer.accentClassName}`}>{layer.title}</p>
+                      {layer.tech.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded border border-border bg-background/40 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-sm md:text-base leading-relaxed text-muted-foreground">{layer.text}</p>
+                  </div>
                 </motion.div>
               ))}
             </div>
