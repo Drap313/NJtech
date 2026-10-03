@@ -1,0 +1,46 @@
+# Scripted events. "offset_minutes" is relative to the moment a scenario is
+# injected in the live app; "at" is the fixed time used by the deterministic
+# replay (scripts/run_demo_scenario.py).
+primary:
+  title: "Pickup delay breaks DG-204 (primary demo)"
+  events:
+    - at: "2026-10-06T06:40:00-04:00"
+      offset_minutes: 0
+      type: PICKUP_DELAYED
+      entity_type: load
+      entity_id: DG-204
+      source: "shipper-phone:Buckeye Kitchen Foods"
+      payload: {delay_minutes: 75, reason: "Dock backlog: reefer pre-cool and pallet rework"}
+
+driver_decline:
+  title: "D-07 declines tomorrow's DG-208"
+  events:
+    - at: "2026-10-06T06:45:00-04:00"
+      offset_minutes: 0
+      type: DRIVER_DECLINED
+      entity_type: assignment
+      entity_id: A-208
+      source: "driver-app:D-07"
+      payload: {driver_id: D-07, reason: "Family commitment tomorrow morning"}
+
+equipment_failure:
+  title: "T-04 air leak at Harrisburg (DG-202)"
+  events:
+    - at: "2026-10-06T06:50:00-04:00"
+      offset_minutes: 0
+      type: VEHICLE_UNAVAILABLE
+      entity_type: tractor
+      entity_id: T-04
+      source: "driver-app:D-04"
+      payload: {reason: "Air leak at gladhand, tractor out of service", until: "2026-10-06T18:00:00-04:00"}
+
+window_change:
+  title: "Hudson Fresh pulls DG-203 delivery earlier"
+  events:
+    - at: "2026-10-06T06:55:00-04:00"
+      offset_minutes: 0
+      type: DELIVERY_WINDOW_CHANGED
+      entity_type: load
+      entity_id: DG-203
+      source: "customer-email:Hudson Fresh Markets"
+      payload: {start: "2026-10-06T08:00:00-04:00", end: "2026-10-06T08:45:00-04:00"}

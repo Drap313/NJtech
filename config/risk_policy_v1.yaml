@@ -1,0 +1,17 @@
+# Schedule risk: a transparent operational heuristic about plan fragility and
+# work pattern. It is NOT fatigue detection and never claims a driver is unfit.
+id: schedule_risk_v1
+version: 1.0.0
+disclaimer: "Schedule risk reflects plan fragility and recent work pattern. It is not a fatigue or medical assessment."
+factors:
+  REPEATED_OVERNIGHT: {points: 20, min_count: 2, lookback_hours: 72, night_start: "00:00", night_end: "05:00"}
+  SHORT_TURNAROUND: {points: 20, threshold_minutes: 660}
+  LOW_PROJECTED_RESERVE: {points: 30, threshold_minutes: 30}
+  DRIVING_NEAR_WINDOW_END: {points: 15, threshold_minutes: 60}
+  RECENT_SCHEDULE_CHANGE: {points: 10, lookback_hours: 24}
+  FRESH_CONFIRMATION_AMPLE_RESERVE: {points: -10, confirmation_minutes: 120, reserve_minutes: 120}
+bands:
+  - {name: normal, min: 0}
+  - {name: elevated, min: 30}
+  - {name: high, min: 60}
+  - {name: critical, min: 80}

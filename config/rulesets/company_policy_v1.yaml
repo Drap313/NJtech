@@ -1,0 +1,12 @@
+# Company policy layered on top of the legal baseline. A null limit means
+# "use the legal limit". Values here may only be stricter than the law.
+id: company_policy_v1
+version: 1.0.0
+max_driving_minutes: null
+max_window_minutes: null
+min_hos_reserve_minutes: 15        # hard: plans must keep at least this much legal reserve
+low_reserve_warning_minutes: 30
+max_eld_age_minutes: 30            # older ELD snapshots are stale -> UNKNOWN
+min_service_slack_minutes: 15      # below this a plan is AT_RISK rather than ON_TIME
+low_slack_warning_minutes: 30
+recommendation_ttl_minutes: 15

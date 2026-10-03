@@ -1,0 +1,245 @@
+# Deterministic synthetic fleet. Scenario day: Tue 2026-10-06 (EDT, UTC-4).
+# Every operational record carries a source and an observed timestamp.
+meta:
+  scenario_start: "2026-10-06T06:30:00-04:00"
+  incident_seq_start: 40   # historical incidents DG-I-0001..0040 exist outside this dataset
+
+terminals: [TERM-CMH, TERM-EWR]
+
+customers:
+  CUST-HFM:
+    name: Hudson Fresh Markets
+    terms: {detention_free_minutes: 120, detention_rate_per_hour: 75, late_flat: 500, late_per_hour: 75, late_cap: 1200, reschedule_allowed: false}
+  CUST-KBS:
+    name: Keystone Building Supply
+    terms: {detention_free_minutes: 120, detention_rate_per_hour: 60, late_flat: 150, late_per_hour: 50, late_cap: 600, reschedule_allowed: true}
+  CUST-GSC:
+    name: Garden State Chemical
+    terms: {detention_free_minutes: 90, detention_rate_per_hour: 90, late_flat: 300, late_per_hour: 100, late_cap: 1500, reschedule_allowed: true}
+
+drivers:
+  - id: D-01
+    name: Marcus Bell
+    home_terminal: TERM-CMH
+    cdl_class: A
+    endorsements: []
+    cdl_expires: 2028-03-31
+    medical_expires: 2027-06-30
+    cycle_profile: "70_8"
+    availability: assigned
+    tractor_id: T-01
+    position: {lat: 39.961, lon: -83.000, location_id: SHIP-BKF, observed_at: "2026-10-06T06:35:00-04:00", source: gps:T-01}
+    eld: {observed_at: "2026-10-06T06:35:00-04:00", source: eld:T-01, duty_status: ON_DUTY, status_since: "2026-10-06T05:10:00-04:00",
+          shift_start: "2026-10-06T04:12:00-04:00", drive_minutes_in_shift: 43, drive_minutes_since_break: 0, cycle_used_minutes: 3200}
+    recent_shifts:
+      - {start: "2026-10-05T04:05:00-04:00", end: "2026-10-05T18:12:00-04:00"}
+      - {start: "2026-10-04T03:50:00-04:00", end: "2026-10-04T17:30:00-04:00"}
+  - id: D-02
+    name: Ana Ruiz
+    home_terminal: TERM-EWR
+    cdl_class: A
+    endorsements: [X, T]
+    credentials: [TWIC, HAZMAT_SECURITY_PLAN]
+    cdl_expires: 2029-01-31
+    medical_expires: 2027-02-28
+    availability: assigned
+    tractor_id: T-02
+    position: {lat: 40.40, lon: -74.70, observed_at: "2026-10-06T06:30:00-04:00", source: gps:T-02}
+    eld: {observed_at: "2026-10-06T06:30:00-04:00", source: eld:T-02, duty_status: DRIVING, status_since: "2026-10-06T06:00:00-04:00",
+          shift_start: "2026-10-06T05:30:00-04:00", drive_minutes_in_shift: 30, drive_minutes_since_break: 30, cycle_used_minutes: 2400}
+    recent_shifts:
+      - {start: "2026-10-05T06:00:00-04:00", end: "2026-10-05T16:30:00-04:00"}
+  - id: D-03
+    name: Devon Price
+    home_terminal: TERM-EWR
+    cdl_class: A
+    endorsements: [T]
+    credentials: [TWIC]
+    cdl_expires: 2027-11-30
+    medical_expires: 2027-04-30
+    availability: available
+    tractor_id: T-03
+    notes: "Local driver; on yard and shuttle work at Newark today."
+    position: {lat: 40.690, lon: -74.150, location_id: TERM-EWR, observed_at: "2026-10-06T06:22:00-04:00", source: gps:T-03}
+    eld: {observed_at: "2026-10-06T06:22:00-04:00", source: eld:T-03, duty_status: ON_DUTY, status_since: "2026-10-06T06:05:00-04:00",
+          shift_start: "2026-10-06T05:42:00-04:00", drive_minutes_in_shift: 20, drive_minutes_since_break: 20, cycle_used_minutes: 2900}
+    recent_shifts:
+      - {start: "2026-10-05T06:00:00-04:00", end: "2026-10-05T16:30:00-04:00"}
+  - id: D-04
+    name: Priya Shah
+    home_terminal: TERM-CMH
+    cdl_class: A
+    endorsements: []
+    cdl_expires: 2028-08-31
+    medical_expires: 2027-09-30
+    availability: assigned
+    tractor_id: T-04
+    position: {lat: 40.262, lon: -76.880, location_id: HBG-KBS, observed_at: "2026-10-06T06:28:00-04:00", source: gps:T-04}
+    eld: {observed_at: "2026-10-06T06:28:00-04:00", source: eld:T-04, duty_status: ON_DUTY, status_since: "2026-10-06T06:00:00-04:00",
+          shift_start: "2026-10-06T05:45:00-04:00", drive_minutes_in_shift: 15, drive_minutes_since_break: 15, cycle_used_minutes: 2000}
+    recent_shifts:
+      - {start: "2026-10-05T06:30:00-04:00", end: "2026-10-05T17:00:00-04:00"}
+  - id: D-05
+    name: Tom Kowalski
+    home_terminal: TERM-CMH
+    cdl_class: A
+    endorsements: []
+    cdl_expires: 2027-05-31
+    medical_expires: 2027-01-31
+    availability: assigned
+    tractor_id: T-07
+    feed: broken   # ELD gateway on T-07 stopped reporting at 03:10
+    position: {lat: 40.42, lon: -80.15, observed_at: "2026-10-06T03:10:00-04:00", source: gps:T-07}
+    eld: {observed_at: "2026-10-06T03:10:00-04:00", source: eld:T-07, duty_status: DRIVING, status_since: "2026-10-06T03:00:00-04:00",
+          shift_start: "2026-10-06T02:45:00-04:00", drive_minutes_in_shift: 10, drive_minutes_since_break: 10, cycle_used_minutes: 3100}
+    recent_shifts:
+      - {start: "2026-10-05T02:30:00-04:00", end: "2026-10-05T13:00:00-04:00"}
+  - id: D-06
+    name: Keisha Moore
+    home_terminal: TERM-CMH
+    cdl_class: A
+    endorsements: []
+    cdl_expires: 2028-02-29
+    medical_expires: 2027-03-31
+    cycle_profile: "60_7"
+    availability: available
+    notes: "Waiting at Harrisburg for a repower; no tractor assigned."
+    position: {lat: 40.262, lon: -76.880, location_id: HBG-KBS, observed_at: "2026-10-06T06:25:00-04:00", source: phone-app}
+    eld: {observed_at: "2026-10-06T06:25:00-04:00", source: eld:mobile, duty_status: OFF_DUTY, status_since: "2026-10-05T20:00:00-04:00",
+          shift_start: null, drive_minutes_in_shift: 0, drive_minutes_since_break: 0, cycle_used_minutes: 3540}
+    recent_shifts:
+      - {start: "2026-10-05T06:00:00-04:00", end: "2026-10-05T20:00:00-04:00"}
+  - id: D-07
+    name: Luis Ortega
+    home_terminal: TERM-EWR
+    cdl_class: A
+    endorsements: []
+    credentials: [TWIC]
+    cdl_expires: 2029-06-30
+    medical_expires: 2027-12-31
+    availability: assigned
+    tractor_id: T-06
+    position: {lat: 40.60, lon: -75.10, observed_at: "2026-10-06T06:30:00-04:00", source: gps:T-06}
+    eld: {observed_at: "2026-10-06T06:30:00-04:00", source: eld:T-06, duty_status: DRIVING, status_since: "2026-10-06T06:10:00-04:00",
+          shift_start: "2026-10-06T05:30:00-04:00", drive_minutes_in_shift: 20, drive_minutes_since_break: 20, cycle_used_minutes: 3000}
+    recent_shifts:
+      - {start: "2026-10-05T05:30:00-04:00", end: "2026-10-05T15:00:00-04:00"}
+  - id: D-08
+    name: Hannah Lee
+    home_terminal: TERM-EWR
+    cdl_class: A
+    endorsements: [T]
+    credentials: [TWIC]
+    cdl_expires: 2028-10-31
+    medical_expires: 2027-08-31
+    availability: assigned
+    tractor_id: T-05
+    position: {lat: 40.663, lon: -74.190, location_id: EWR-XD, observed_at: "2026-10-06T06:27:00-04:00", source: gps:T-05}
+    eld: {observed_at: "2026-10-06T06:27:00-04:00", source: eld:T-05, duty_status: ON_DUTY, status_since: "2026-10-06T06:15:00-04:00",
+          shift_start: "2026-10-06T06:00:00-04:00", drive_minutes_in_shift: 10, drive_minutes_since_break: 10, cycle_used_minutes: 1900}
+    recent_shifts:
+      - {start: "2026-10-05T06:00:00-04:00", end: "2026-10-05T15:30:00-04:00"}
+  - id: D-09
+    name: Sam Okafor
+    home_terminal: TERM-CMH
+    cdl_class: A
+    endorsements: [N]
+    cdl_expires: 2028-12-31
+    medical_expires: 2027-10-31
+    availability: available
+    notes: "Off today; can be called in."
+    position: {lat: 39.857, lon: -82.913, location_id: TERM-CMH, observed_at: "2026-10-06T06:30:00-04:00", source: phone-app}
+    eld: {observed_at: "2026-10-06T06:30:00-04:00", source: eld:mobile, duty_status: OFF_DUTY, status_since: "2026-10-05T18:00:00-04:00",
+          shift_start: null, drive_minutes_in_shift: 0, drive_minutes_since_break: 0, cycle_used_minutes: 2100}
+    recent_shifts:
+      - {start: "2026-10-05T07:00:00-04:00", end: "2026-10-05T18:00:00-04:00"}
+  - id: D-10
+    name: Rita Novak
+    home_terminal: TERM-CMH
+    cdl_class: A
+    endorsements: [H, T]
+    credentials: [HAZMAT_SECURITY_PLAN]
+    cdl_expires: 2027-09-30
+    medical_expires: 2027-05-31
+    availability: available
+    available_from: "2026-10-06T19:00:00-05:00"
+    tractor_id: T-08
+    notes: "In a 34-hour restart in Chicago."
+    position: {lat: 41.850, lon: -87.650, location_id: CHI-LSP, observed_at: "2026-10-06T05:30:00-05:00", source: phone-app}
+    eld: {observed_at: "2026-10-06T05:30:00-05:00", source: eld:T-08, duty_status: OFF_DUTY, status_since: "2026-10-05T09:00:00-05:00",
+          shift_start: null, drive_minutes_in_shift: 0, drive_minutes_since_break: 0, cycle_used_minutes: 3900}
+    recent_shifts:
+      - {start: "2026-10-04T20:00:00-05:00", end: "2026-10-05T09:00:00-05:00"}
+
+tractors:
+  - {id: T-01, kind: sleeper, transmission: automatic, status: in_use, position: {lat: 39.961, lon: -83.000, location_id: SHIP-BKF, observed_at: "2026-10-06T06:35:00-04:00", source: telematics:T-01}}
+  - {id: T-02, kind: sleeper, transmission: automatic, hazmat_capable: true, status: in_use, position: {lat: 40.40, lon: -74.70, observed_at: "2026-10-06T06:30:00-04:00", source: telematics:T-02}}
+  - {id: T-03, kind: day_cab, transmission: automatic, status: available, position: {lat: 40.690, lon: -74.150, location_id: TERM-EWR, observed_at: "2026-10-06T06:22:00-04:00", source: telematics:T-03}}
+  - {id: T-04, kind: day_cab, transmission: manual, status: in_use, position: {lat: 40.262, lon: -76.880, location_id: HBG-KBS, observed_at: "2026-10-06T06:28:00-04:00", source: telematics:T-04}}
+  - {id: T-05, kind: day_cab, transmission: automatic, status: in_use, position: {lat: 40.663, lon: -74.190, location_id: EWR-XD, observed_at: "2026-10-06T06:27:00-04:00", source: telematics:T-05}}
+  - id: T-06
+    kind: sleeper
+    transmission: automatic
+    status: in_use
+    position: {lat: 40.60, lon: -75.10, observed_at: "2026-10-06T06:30:00-04:00", source: telematics:T-06}
+    maintenance: [{start: "2026-10-08T07:00:00-04:00", end: "2026-10-08T17:00:00-04:00", reason: "Planned outage: DOT annual inspection + brake job"}]
+  - {id: T-07, kind: sleeper, transmission: automatic, status: in_use, position: {lat: 40.42, lon: -80.15, observed_at: "2026-10-06T03:10:00-04:00", source: telematics:T-07}}
+  - {id: T-08, kind: sleeper, transmission: automatic, hazmat_capable: true, status: available, position: {lat: 41.850, lon: -87.650, location_id: CHI-LSP, observed_at: "2026-10-06T05:30:00-05:00", source: telematics:T-08}}
+
+trailers:
+  - {id: R-01, type: reefer, status: in_use, position: {lat: 39.961, lon: -83.000, location_id: SHIP-BKF, observed_at: "2026-10-06T06:35:00-04:00", source: telematics:R-01}}
+  - {id: R-02, type: reefer, status: available, position: {lat: 39.857, lon: -82.913, location_id: TERM-CMH, observed_at: "2026-10-06T06:00:00-04:00", source: yard-check}}
+  - {id: R-03, type: dry_van, status: in_use, position: {lat: 40.663, lon: -74.190, location_id: EWR-XD, observed_at: "2026-10-06T06:27:00-04:00", source: telematics:R-03}}
+  - {id: R-04, type: dry_van, status: in_use, position: {lat: 40.42, lon: -80.15, observed_at: "2026-10-06T03:10:00-04:00", source: telematics:R-04}}
+  - {id: R-05, type: dry_van, status: in_use, position: {lat: 40.60, lon: -75.10, observed_at: "2026-10-06T06:30:00-04:00", source: telematics:R-05}}
+  - {id: R-06, type: flatbed, length_ft: 48, status: in_use, position: {lat: 40.262, lon: -76.880, location_id: HBG-KBS, observed_at: "2026-10-06T06:28:00-04:00", source: telematics:R-06}}
+  - {id: R-07, type: flatbed, length_ft: 48, status: available, position: {lat: 40.276, lon: -76.835, location_id: RELAY-HBG, observed_at: "2026-10-06T06:00:00-04:00", source: yard-check}}
+  - {id: R-08, type: tanker, hazmat_capable: true, status: in_use, position: {lat: 40.40, lon: -74.70, observed_at: "2026-10-06T06:30:00-04:00", source: telematics:R-08}}
+  - {id: R-09, type: tanker, hazmat_capable: true, status: available, position: {lat: 40.622, lon: -74.244, location_id: LIN-GSC, observed_at: "2026-10-06T06:00:00-04:00", source: yard-check}}
+  - {id: R-10, type: dry_van, status: available, position: {lat: 41.850, lon: -87.650, location_id: CHI-LSP, observed_at: "2026-10-06T05:30:00-05:00", source: yard-check}}
+
+loads:
+  - {id: DG-201, customer_id: CUST-GSC, origin_id: LIN-GSC, destination_id: BAL-GSC, route_id: R-201, commodity: "Sodium hypochlorite solution (UN1791)",
+     pickup_window: {start: "2026-10-06T05:00:00-04:00", end: "2026-10-06T06:00:00-04:00"}, delivery_window: {start: "2026-10-06T09:00:00-04:00", end: "2026-10-06T12:00:00-04:00"},
+     load_minutes: 45, unload_minutes: 60, planned_miles: 185, planned_drive_minutes: 200, equipment_type: tanker, hazmat: true, tank: true, revenue: 1450, priority: high, status: active}
+  - {id: DG-202, customer_id: CUST-KBS, origin_id: HBG-KBS, destination_id: ABE-KBS, route_id: R-202, commodity: "Lumber, bundled",
+     pickup_window: {start: "2026-10-06T06:00:00-04:00", end: "2026-10-06T07:00:00-04:00"}, delivery_window: {start: "2026-10-06T09:00:00-04:00", end: "2026-10-06T12:00:00-04:00"},
+     load_minutes: 90, unload_minutes: 45, planned_miles: 80, planned_drive_minutes: 95, equipment_type: flatbed, revenue: 780, priority: normal, status: active}
+  - {id: DG-203, customer_id: CUST-HFM, origin_id: EWR-XD, destination_id: PHL-HFM, route_id: R-203, commodity: "Dry grocery, mixed pallets",
+     pickup_window: {start: "2026-10-06T06:00:00-04:00", end: "2026-10-06T07:00:00-04:00"}, delivery_window: {start: "2026-10-06T10:00:00-04:00", end: "2026-10-06T13:00:00-04:00"},
+     load_minutes: 60, unload_minutes: 60, planned_miles: 90, planned_drive_minutes: 110, equipment_type: dry_van, requires_credentials: [TWIC], revenue: 900, priority: normal, status: active}
+  - {id: DG-204, customer_id: CUST-HFM, origin_id: SHIP-BKF, destination_id: CONS-HFM, route_id: R-204, commodity: "Fresh prepared meals, 34F",
+     pickup_window: {start: "2026-10-06T05:00:00-04:00", end: "2026-10-06T06:00:00-04:00"}, delivery_window: {start: "2026-10-06T16:00:00-04:00", end: "2026-10-06T19:00:00-04:00"},
+     load_minutes: 150, unload_minutes: 60, planned_miles: 505, planned_drive_minutes: 568, equipment_type: reefer, revenue: 2850, priority: high, status: active}
+  - {id: DG-205, customer_id: CUST-KBS, origin_id: PIT-KBS, destination_id: CMH-KBS, route_id: R-205, commodity: "Drywall",
+     pickup_window: {start: "2026-10-06T02:00:00-04:00", end: "2026-10-06T03:00:00-04:00"}, delivery_window: {start: "2026-10-06T08:00:00-04:00", end: "2026-10-06T11:00:00-04:00"},
+     load_minutes: 30, unload_minutes: 45, planned_miles: 185, planned_drive_minutes: 190, equipment_type: dry_van, revenue: 820, priority: normal, status: active}
+  - {id: DG-206, customer_id: CUST-GSC, origin_id: ABE-GSC, destination_id: LIN-GSC, route_id: R-206, commodity: "Packaging materials (non-hazardous)",
+     pickup_window: {start: "2026-10-06T05:30:00-04:00", end: "2026-10-06T06:30:00-04:00"}, delivery_window: {start: "2026-10-06T08:00:00-04:00", end: "2026-10-06T10:00:00-04:00"},
+     load_minutes: 30, unload_minutes: 45, planned_miles: 75, planned_drive_minutes: 100, equipment_type: dry_van, revenue: 520, priority: low, status: active}
+  - {id: DG-207, customer_id: CUST-GSC, origin_id: LIN-GSC, destination_id: BAL-GSC, route_id: R-201, commodity: "Sodium hypochlorite solution (UN1791)",
+     pickup_window: {start: "2026-10-07T07:00:00-04:00", end: "2026-10-07T08:00:00-04:00"}, delivery_window: {start: "2026-10-07T13:00:00-04:00", end: "2026-10-07T15:00:00-04:00"},
+     load_minutes: 45, unload_minutes: 60, planned_miles: 185, planned_drive_minutes: 200, equipment_type: tanker, hazmat: true, tank: true, revenue: 1450, priority: normal, status: proposed}
+  - {id: DG-208, customer_id: CUST-HFM, origin_id: EWR-XD, destination_id: PHL-HFM, route_id: R-203, commodity: "Dry grocery, mixed pallets",
+     pickup_window: {start: "2026-10-07T09:00:00-04:00", end: "2026-10-07T10:00:00-04:00"}, delivery_window: {start: "2026-10-07T12:00:00-04:00", end: "2026-10-07T15:00:00-04:00"},
+     load_minutes: 60, unload_minutes: 60, planned_miles: 90, planned_drive_minutes: 110, equipment_type: dry_van, requires_credentials: [TWIC], revenue: 900, priority: normal, status: proposed}
+  - {id: DG-209, customer_id: CUST-KBS, origin_id: CHI-LSP, destination_id: CMH-KBS, route_id: R-209, commodity: "Corrugated packaging",
+     pickup_window: {start: "2026-10-07T07:00:00-05:00", end: "2026-10-07T09:00:00-05:00"}, delivery_window: {start: "2026-10-07T15:00:00-04:00", end: "2026-10-07T17:00:00-04:00"},
+     load_minutes: 120, unload_minutes: 45, planned_miles: 355, planned_drive_minutes: 330, equipment_type: dry_van, revenue: 1100, priority: low, status: proposed}
+
+assignments:
+  - {id: A-201, load_id: DG-201, driver_id: D-02, tractor_id: T-02, trailer_id: R-08, status: DISPATCHED,
+     progress: {stage: IN_TRANSIT, stage_started_at: "2026-10-06T06:00:00-04:00", route_minutes_done: 30, as_of: "2026-10-06T06:30:00-04:00"}}
+  - {id: A-202, load_id: DG-202, driver_id: D-04, tractor_id: T-04, trailer_id: R-06, status: DISPATCHED,
+     progress: {stage: AT_PICKUP, stage_started_at: "2026-10-06T06:00:00-04:00", as_of: "2026-10-06T06:28:00-04:00"}}
+  - {id: A-203, load_id: DG-203, driver_id: D-08, tractor_id: T-05, trailer_id: R-03, status: DISPATCHED,
+     progress: {stage: AT_PICKUP, stage_started_at: "2026-10-06T06:15:00-04:00", as_of: "2026-10-06T06:27:00-04:00"}}
+  - {id: A-204, load_id: DG-204, driver_id: D-01, tractor_id: T-01, trailer_id: R-01, status: DISPATCHED, driver_confirmed_at: "2026-10-06T04:15:00-04:00",
+     progress: {stage: AT_PICKUP, stage_started_at: "2026-10-06T05:10:00-04:00", as_of: "2026-10-06T06:35:00-04:00"}}
+  - {id: A-205, load_id: DG-205, driver_id: D-05, tractor_id: T-07, trailer_id: R-04, status: DISPATCHED,
+     progress: {stage: IN_TRANSIT, stage_started_at: "2026-10-06T03:00:00-04:00", route_minutes_done: 10, as_of: "2026-10-06T03:10:00-04:00"}}
+  - {id: A-206, load_id: DG-206, driver_id: D-07, tractor_id: T-06, trailer_id: R-05, status: DISPATCHED,
+     progress: {stage: IN_TRANSIT, stage_started_at: "2026-10-06T06:10:00-04:00", route_minutes_done: 20, as_of: "2026-10-06T06:30:00-04:00"}}
+  - {id: A-207, load_id: DG-207, driver_id: D-06, tractor_id: T-02, trailer_id: R-09, status: PROPOSED, progress: {stage: PLANNED}}
+  - {id: A-208, load_id: DG-208, driver_id: D-07, tractor_id: T-06, trailer_id: R-05, status: PROPOSED, progress: {stage: PLANNED}}
+  - {id: A-209, load_id: DG-209, driver_id: D-10, tractor_id: T-08, trailer_id: R-10, status: PROPOSED, progress: {stage: PLANNED}}

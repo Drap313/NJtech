@@ -1,0 +1,53 @@
+# Deterministic synthetic road network. Loaded routes use explicit waypoint
+# offsets; any other movement uses an explicit pair below or, failing that,
+# great-circle distance x 1.2 at 50 mph.
+locations:
+  TERM-CMH: {name: "Columbus Terminal (Groveport, OH)", lat: 39.857, lon: -82.913, tz: America/New_York, state: OH, kind: terminal, parking: true}
+  TERM-EWR: {name: "Newark Terminal (Port Newark, NJ)", lat: 40.690, lon: -74.150, tz: America/New_York, state: NJ, kind: terminal, parking: true}
+  SHIP-BKF: {name: "Buckeye Kitchen Foods (Columbus, OH)", lat: 39.961, lon: -83.000, tz: America/New_York, state: OH, kind: shipper}
+  CONS-HFM: {name: "Hudson Fresh Markets DC (Bronx, NY)", lat: 40.809, lon: -73.880, tz: America/New_York, state: NY, kind: consignee}
+  WP-BRZ: {name: "Breezewood Truck Plaza (PA)", lat: 39.998, lon: -78.240, tz: America/New_York, state: PA, kind: waypoint, parking: true}
+  RELAY-HBG: {name: "Harrisburg Relay Lot (I-81, PA)", lat: 40.276, lon: -76.835, tz: America/New_York, state: PA, kind: relay, parking: true, relay: true}
+  RELAY-X18: {name: "Exit 18 Relay Lot (I-78, NJ)", lat: 40.640, lon: -74.860, tz: America/New_York, state: NJ, kind: relay, parking: true, relay: true}
+  LIN-GSC: {name: "Garden State Chemical (Linden, NJ)", lat: 40.622, lon: -74.244, tz: America/New_York, state: NJ, kind: shipper}
+  BAL-GSC: {name: "Garden State Chemical Terminal (Baltimore, MD)", lat: 39.262, lon: -76.560, tz: America/New_York, state: MD, kind: consignee}
+  ABE-GSC: {name: "Garden State Chemical Warehouse (Allentown, PA)", lat: 40.602, lon: -75.471, tz: America/New_York, state: PA, kind: shipper}
+  HBG-KBS: {name: "Keystone Building Supply (Harrisburg, PA)", lat: 40.262, lon: -76.880, tz: America/New_York, state: PA, kind: shipper}
+  ABE-KBS: {name: "Keystone Building Supply (Allentown, PA)", lat: 40.585, lon: -75.520, tz: America/New_York, state: PA, kind: consignee}
+  PIT-KBS: {name: "Keystone Building Supply Yard (Pittsburgh, PA)", lat: 40.440, lon: -79.990, tz: America/New_York, state: PA, kind: shipper}
+  CMH-KBS: {name: "Keystone Building Supply (Columbus, OH)", lat: 39.990, lon: -82.880, tz: America/New_York, state: OH, kind: consignee}
+  EWR-XD: {name: "Hudson Fresh Cross-dock (Elizabeth, NJ)", lat: 40.663, lon: -74.190, tz: America/New_York, state: NJ, kind: shipper}
+  PHL-HFM: {name: "Hudson Fresh Markets (Philadelphia, PA)", lat: 39.952, lon: -75.165, tz: America/New_York, state: PA, kind: consignee}
+  CHI-LSP: {name: "Lakeshore Packaging (Chicago, IL)", lat: 41.850, lon: -87.650, tz: America/Chicago, state: IL, kind: shipper}
+
+pairs:
+  - {a: TERM-EWR, b: RELAY-X18, miles: 52, minutes: 60}
+  - {a: TERM-CMH, b: SHIP-BKF, miles: 14, minutes: 25}
+  - {a: TERM-EWR, b: EWR-XD, miles: 5, minutes: 15}
+  - {a: CONS-HFM, b: TERM-EWR, miles: 22, minutes: 50}
+
+routes:
+  R-204:
+    - {loc: SHIP-BKF, miles: 0, minutes: 0}
+    - {loc: WP-BRZ, miles: 183, minutes: 195}
+    - {loc: RELAY-HBG, miles: 300, minutes: 325}
+    - {loc: RELAY-X18, miles: 440, minutes: 463}
+    - {loc: CONS-HFM, miles: 505, minutes: 568}
+  R-201:
+    - {loc: LIN-GSC, miles: 0, minutes: 0}
+    - {loc: BAL-GSC, miles: 185, minutes: 200}
+  R-202:
+    - {loc: HBG-KBS, miles: 0, minutes: 0}
+    - {loc: ABE-KBS, miles: 80, minutes: 95}
+  R-203:
+    - {loc: EWR-XD, miles: 0, minutes: 0}
+    - {loc: PHL-HFM, miles: 90, minutes: 110}
+  R-205:
+    - {loc: PIT-KBS, miles: 0, minutes: 0}
+    - {loc: CMH-KBS, miles: 185, minutes: 190}
+  R-206:
+    - {loc: ABE-GSC, miles: 0, minutes: 0}
+    - {loc: LIN-GSC, miles: 75, minutes: 100}
+  R-209:
+    - {loc: CHI-LSP, miles: 0, minutes: 0}
+    - {loc: CMH-KBS, miles: 355, minutes: 330}

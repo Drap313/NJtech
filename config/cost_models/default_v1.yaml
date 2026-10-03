@@ -1,0 +1,26 @@
+# Every coefficient used by the cost model. "estimate" values are internal
+# operating-cost estimates; "contract" values come from driver pay policy or
+# customer terms (customer late/detention terms live on each customer record).
+id: default_cost_v1
+version: 1.0.0
+currency: USD
+coefficients:
+  cost_per_mile: {value: 1.85, basis: estimate}            # tractor operating cost, empty/bobtail miles
+  shuttle_cost_per_mile: {value: 1.50, basis: estimate}    # moving a driver by car to/from a truck
+  labor_cost_per_minute: {value: 0.55, basis: estimate}    # driver wage + burden, on-duty minutes
+  idle_cost_per_minute: {value: 0.40, basis: estimate}     # waiting beyond free time
+  relay_handling_cost: {value: 132, basis: estimate}       # relay coordination, drop/hook at lot
+  equipment_swap_cost: {value: 120, basis: estimate}
+  appointment_change_cost: {value: 75, basis: estimate}
+  driver_call_in_premium: {value: 175, basis: contract}    # calling an off-duty driver in
+  driver_reassignment_pay: {value: 150, basis: contract}   # guarantee when a dispatched load is taken away
+  risk_penalty_per_point: {value: 0.0, basis: policy}      # optional; off by default
+operations:
+  pretrip_minutes: 15
+  relay_handoff_minutes: 15
+  driver_swap_handoff_minutes: 15
+  tractor_swap_hook_minutes: 30
+  free_wait_minutes: 120
+  long_wait_goes_off_duty_minutes: 120
+  shuttle_max_miles: 60
+  reset_hold_minutes: 600

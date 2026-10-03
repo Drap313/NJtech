@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dispatch Guardian</title>
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><span class="logo">◆</span><div><b>Dispatch</b><span>Guardian</span></div></div>
+    <nav id="nav"></nav>
+    <div class="side-foot">
+      <div class="pill"><span class="dot" id="h-llm"></span><span id="h-llm-t">vLLM</span></div>
+      <div class="pill"><span class="dot" id="h-vlm"></span><span id="h-vlm-t">Ollama</span></div>
+      <div class="pill"><span class="dot" id="h-rt"></span><span id="h-rt-t">monitor</span></div>
+      <div class="muted small">All inference local on GB10</div>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="iconbtn" id="menu" aria-label="Menu">☰</button>
+      <div class="crumbs" id="crumbs"></div>
+      <div class="clock" id="clock">--:--</div>
+      <div class="seg" id="speeds">
+        <button data-s="pause" title="Pause">❚❚</button><button data-s="1">1×</button><button data-s="10">10×</button><button data-s="60">60×</button><button data-s="300">300×</button>
+      </div>
+      <button class="btn" id="adv" title="Advance the sim clock">+15m</button>
+      <label class="who">Dispatcher <input id="actor" value="dispatcher"></label>
+    </header>
+    <div id="banner"></div>
+    <main id="view"></main>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

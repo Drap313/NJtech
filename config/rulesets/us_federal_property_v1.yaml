@@ -1,0 +1,34 @@
+# Standard U.S. interstate property-carrying CMV hours of service (49 CFR Part 395).
+# Verify against the current eCFR before production use. Anything listed under
+# unsupported_exceptions returns MANUAL_REVIEW instead of a verdict.
+id: us_federal_property_v1
+version: 1.0.0
+verified_against_regulation: false
+limits:
+  driving_minutes: 660            # 11 hours driving
+  window_minutes: 840             # 14-hour on-duty window
+  off_duty_reset_minutes: 600     # 10 consecutive hours off duty
+  break_after_driving_minutes: 480  # 30-min break after 8 cumulative hours driving
+  break_minutes: 30
+  restart_minutes: 2040           # 34-hour restart
+  cycles:
+    "70_8": {minutes: 4200, days: 8}
+    "60_7": {minutes: 3600, days: 7}
+citations:
+  DRIVE_LIMIT: "49 CFR 395.3(a)(3)(i) 11-hour driving limit"
+  SHIFT_LIMIT: "49 CFR 395.3(a)(2) 14-hour period"
+  BREAK_REQUIRED: "49 CFR 395.3(a)(3)(ii) 30-minute break after 8 hours driving"
+  OFF_DUTY_RESET: "49 CFR 395.3(a)(1) 10 consecutive hours off duty"
+  CYCLE_LIMIT: "49 CFR 395.3(b) 60/70-hour limit"
+  RESTART: "49 CFR 395.3(c) 34-hour restart"
+  CDL_CLASS: "49 CFR 383.91 commercial motor vehicle groups"
+  ENDORSEMENT_MISSING: "49 CFR 383.93 endorsements"
+  RESTRICTION: "49 CFR 383.95 restrictions"
+  CDL_EXPIRED: "49 CFR 383.23 commercial driver's license required"
+  MEDICAL_EXPIRED: "49 CFR 391.41/391.45 physical qualification"
+unsupported_exceptions:
+  - adverse_driving_conditions
+  - sleeper_berth_split
+  - short_haul
+  - agricultural
+  - personal_conveyance
