@@ -31,6 +31,7 @@ class RecoveryPlan:
     schedule_risk: str
     customer_penalty: float
     estimated_load_margin: float
+    schedule_risk_score: int = 0
     score: float = 0.0
     rejected_candidates: list[dict] = field(default_factory=list)
 
@@ -122,6 +123,7 @@ def find_costed_alternatives(
             schedule_risk=risk["schedule_risk_state"],
             customer_penalty=0.0,
             estimated_load_margin=margin,
+            schedule_risk_score=risk["score"],
         )
         plan.score = _score(plan)
         plans.append(plan)
@@ -170,6 +172,7 @@ def find_costed_alternatives(
                 schedule_risk=risk["schedule_risk_state"],
                 customer_penalty=0.0,
                 estimated_load_margin=estimated_load_margin(load.revenue, cost),
+                schedule_risk_score=risk["score"],
             )
             plan.score = _score(plan)
             plans.append(plan)
