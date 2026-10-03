@@ -727,10 +727,7 @@ const Index = () => {
               className="space-y-3"
             >
               <p className="text-xl md:text-2xl text-muted-foreground">
-                {teamMembers.map((member) => member.name).join('  ·  ')}
-              </p>
-              <p className="text-base md:text-lg font-semibold tracking-wide text-foreground">
-                New Jersey Institute of Technology
+                Proudly drove <span className="text-foreground font-semibold">220 miles</span> from NJIT
               </p>
             </motion.div>
 
@@ -741,7 +738,7 @@ const Index = () => {
               viewport={{ once: false, amount: 0.3 }}
               className="space-y-5"
             >
-              <p className="mx-auto max-w-3xl text-2xl md:text-3xl font-medium leading-snug text-foreground">
+              <p className="mx-auto max-w-4xl text-3xl md:text-5xl font-semibold leading-tight text-foreground">
                 &ldquo;Trucks are the <span className="text-primary">traces of the physical world</span>.&rdquo;
               </p>
               <p className="text-lg md:text-xl text-muted-foreground">
