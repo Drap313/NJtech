@@ -88,69 +88,52 @@ const workflowArtifacts = [
 
 const stackCards = [
   {
-    title: 'Local By Design',
-    text: 'Qwen3.6-35B-A3B (NVFP4) on vLLM, served from the Dell Pro Max GB10. Explains incidents, compares plans, drafts dispatcher comms.',
+    title: 'Understands the incident',
+    text: 'Qwen3.6-35B-A3B (NVFP4) on vLLM, local on the GB10. Reads what broke and says which constraint failed, in plain language.',
     accentClassName: 'text-primary',
     borderClassName: 'border-primary/30',
     bgClassName: 'bg-primary/10',
   },
   {
-    title: 'Hot Path Without the LLM',
-    text: 'Python compliance engine · 49 CFR 395.3 ruleset · recovery solver · cost model. Deterministic — the model never does legal arithmetic.',
+    title: 'Compares the options',
+    text: 'Ranks the legal recoveries against each other by cost and ETA. The dispatcher gets a decision, not another dashboard to read.',
     accentClassName: 'text-secondary',
     borderClassName: 'border-secondary/30',
     bgClassName: 'bg-secondary/10',
   },
   {
-    title: 'Data Never Leaves',
-    text: 'Driver records, rates, customer terms stay on the box. Slack Block Kit approvals into an append-only log. No per-token bill.',
+    title: 'Extends the dispatcher',
+    text: 'One dispatcher covers more loads without losing track of any of them. The bandwidth goes up; the headcount does not.',
     accentClassName: 'text-accent',
     borderClassName: 'border-accent/30',
     bgClassName: 'bg-accent/10',
   },
 ];
 
-const marketCards = [
+const eldCards = [
   {
-    title: 'TAM',
-    value: '$10B+',
-    description: 'Fleet management software, growing ~19% a year on a mature ELD base',
-    methodology: 'ELD itself grows only 4-5% — the growth is in the intelligence layer',
-    bullets: ['Motive pulled its IPO for $1.3B to go all-in on AI dispatch'],
-    borderClassName: 'border-[#3fc4d6]/45',
-    accentClassName: 'text-[#5fd6e4]',
-    dotClassName: 'bg-[#2fb6cc]',
-    shadowClassName: 'shadow-[0_28px_80px_rgba(63,196,214,0.14)]',
+    title: 'Inflexible',
+    text: 'Hardware in every cab, multi-year contracts, one vendor’s roadmap. It logs the rule it was built for and nothing else.',
+    accentClassName: 'text-destructive',
+    borderClassName: 'border-destructive/30',
+    bgClassName: 'bg-destructive/10',
   },
   {
-    title: 'SAM',
-    value: '~$2-3B',
-    description: 'Small and mid-size US fleets that need compliance tooling but can’t afford enterprise TMS',
-    methodology: '~580K for-hire carriers, 97% under 20 trucks; enterprise TMS runs $10K-100K+ to implement',
-    bullets: [
-      'Already paying $19-25/truck/month for an ELD, $27-50 for telematics',
-      'Brokers screen safety profiles — a bad record costs freight, not just premium',
-    ],
-    borderClassName: 'border-primary/45',
-    accentClassName: 'text-primary',
-    dotClassName: 'bg-primary',
-    shadowClassName: 'shadow-[0_28px_80px_rgba(61,152,250,0.14)]',
-  },
-  {
-    title: 'SOM - Year 3',
-    value: '$1M-$5M',
-    description: 'Early-adopter fleets of 5-50 trucks approving dispatch in Slack',
-    methodology: 'Reachable fleets × conversion × $29-39/truck/month — estimate, not yet validated by customer discovery',
-    bullets: [
-      'Above the ELD line item, below telematics — no hardware, no lock-in',
-      'A 20-truck fleet pays ~$8,000/yr; one prevented fine covers it',
-    ],
-    borderClassName: 'border-[#d9a441]/45',
+    title: 'Costly',
+    text: '$19-25 per truck per month before telematics, plus hardware per vehicle — to be told what already happened.',
     accentClassName: 'text-[#e4b24d]',
-    dotClassName: 'bg-[#c88419]',
-    shadowClassName: 'shadow-[0_28px_80px_rgba(217,164,65,0.14)]',
+    borderClassName: 'border-[#e4b24d]/30',
+    bgClassName: 'bg-[#e4b24d]/10',
+  },
+  {
+    title: 'Not local',
+    text: 'The log lives in the vendor’s cloud, under the vendor’s terms — and underwriters already read it as a pricing input.',
+    accentClassName: 'text-[#5fd6e4]',
+    borderClassName: 'border-[#5fd6e4]/30',
+    bgClassName: 'bg-[#5fd6e4]/10',
   },
 ];
+
 
 const Citation = ({ text, className = '' }: { text: string; className?: string }) => (
   <p className={`mt-4 text-xs leading-relaxed tracking-wide text-muted-foreground/70 ${className}`}>
@@ -164,7 +147,7 @@ const MAIN_NAV_ITEMS = [
   { label: 'Stakes', id: 'stakes' },
   { label: 'Guardian', id: 'how-it-works' },
   { label: 'Stack', id: 'stack' },
-  { label: 'Market', id: 'market-size' },
+  { label: 'ELD', id: 'eld' },
   { label: 'Conclusion', id: 'conclusion' },
 ];
 
@@ -310,7 +293,8 @@ const Index = () => {
               </p>
               <p className="mx-auto mt-3 max-w-4xl text-base leading-relaxed text-muted-foreground md:text-lg">
                 Today that math lives in a dispatcher&rsquo;s head or on paper. The software that exists is old,
-                or connects one piece of the puzzle.
+                or connects one piece of the puzzle — and 97% of US carriers run fewer than 20 trucks, too small
+                to buy their way out of it.
               </p>
             </motion.div>
 
@@ -480,8 +464,9 @@ const Index = () => {
               <h1 className="text-3xl font-bold text-foreground md:text-5xl xl:text-6xl">
                 The whole stack runs on <span className="text-primary">one box</span>
               </h1>
-              <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground">
-                Dell Pro Max with NVIDIA GB10. Reasoning, rules, and orchestration — all local.
+              <p className="max-w-4xl mx-auto text-lg md:text-xl text-muted-foreground">
+                Dell Pro Max with NVIDIA GB10. Legal limits stay in deterministic Python —{' '}
+                <span className="text-foreground">the model never does legal arithmetic.</span>
               </p>
             </div>
 
@@ -509,67 +494,48 @@ const Index = () => {
           </div>
         </Section>
 
-
-        <Section id="market-size" className="bg-transparent" contentClassName="max-w-[92rem] py-6">
+        <Section id="eld" className="bg-transparent" contentClassName="max-w-6xl py-8">
           <div className="space-y-6">
             <div className="text-center space-y-3">
-              <h1 className="text-4xl md:text-6xl font-bold text-foreground">
-                The fleets <span className="text-primary">nobody built for</span>
+              <h1 className="text-3xl font-bold text-foreground md:text-5xl xl:text-6xl">
+                The ELD <span className="text-destructive">records</span>. It doesn&rsquo;t decide.
               </h1>
-              <p className="max-w-5xl mx-auto text-lg md:text-xl text-muted-foreground">
-                97% of for-hire carriers run fewer than 20 trucks — too small to buy an enterprise TMS,
-                too exposed to operate without one.
+              <p className="max-w-4xl mx-auto text-lg md:text-xl text-muted-foreground">
+                Every truck has had one since the mandate — and hours-of-service is still the #2 driver
+                out-of-service violation at roadside.
               </p>
             </div>
 
-            <div className="grid max-w-[90rem] mx-auto gap-5 lg:grid-cols-3">
-              {marketCards.map((card, index) => (
+            <div className="grid gap-5 md:grid-cols-3 max-w-6xl mx-auto text-left">
+              {eldCards.map((card, index) => (
                 <motion.div
                   key={card.title}
-                  initial={{ opacity: 0, y: 28 }}
+                  initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.55, delay: 0.1 * index }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  className={`h-full rounded-xl border p-6 ${card.bgClassName} ${card.borderClassName}`}
                 >
-                  <div className={`h-full rounded-[1.75rem] border bg-card/90 px-6 py-7 backdrop-blur-md ${card.borderClassName} ${card.shadowClassName}`}>
-                    <p className={`text-lg md:text-xl font-semibold tracking-[0.14em] uppercase ${card.accentClassName}`}>
-                      {card.title}
-                    </p>
-                    <div className={`mt-3 text-3xl md:text-4xl font-black tracking-tight ${card.accentClassName}`}>
-                      {card.value}
-                    </div>
-                    <p className="mt-4 text-base md:text-lg leading-relaxed text-muted-foreground">
-                      {card.description}
-                    </p>
-                    {card.methodology && (
-                      <p className="mt-3 text-xs md:text-sm leading-relaxed text-muted-foreground/70 font-mono bg-white/5 rounded-lg px-3 py-2">
-                        {card.methodology}
-                      </p>
-                    )}
-
-                    <div className="mt-5 border-t border-border/60 pt-4">
-                      <ul className="space-y-3">
-                        {card.bullets.map((bullet) => (
-                          <li key={bullet} className="flex items-start gap-3 text-base md:text-lg leading-relaxed text-foreground/90">
-                            <span className={`mt-2 h-2 w-2 shrink-0 rounded-full ${card.dotClassName}`} />
-                            <span>{bullet}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
+                  <p className={`text-xl md:text-2xl font-semibold ${card.accentClassName}`}>{card.title}</p>
+                  <p className="mt-3 text-sm md:text-base leading-relaxed text-foreground">{card.text}</p>
                 </motion.div>
               ))}
             </div>
 
-            <div className="rounded-xl border border-primary/25 bg-card/90 p-5 max-w-6xl mx-auto text-center">
-              <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-                Telematics incumbents coach from the log after the fact; enterprise TMS buries hours-of-service
-                inside quote-only suites. <span className="text-foreground font-semibold">Nobody pairs always-on
-                monitoring with costed recovery and local inference.</span>
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-6 max-w-5xl mx-auto text-center">
+              <p className="text-lg md:text-xl text-foreground leading-relaxed">
+                Recording a violation was never the same as preventing one.{' '}
+                <span className="font-semibold text-primary">Guardian keeps the balance — the reasoning runs
+                on your box, the data never leaves, and the output is a decision.</span>
+              </p>
+              <p className="mt-3 text-sm md:text-base text-muted-foreground border-t border-border/50 pt-3">
+                Nobody pairs always-on monitoring with costed recovery and local inference.
               </p>
             </div>
           </div>
         </Section>
+
+
 
 
         <Section id="conclusion" className="bg-transparent" contentClassName="max-w-5xl py-16">
