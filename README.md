@@ -71,19 +71,35 @@ data/synthetic/ fleet.yaml (10 drivers, 8 tractors, 10 trailers, 9 loads), netwo
 data/runtime/   SQLite DBs + audit.jsonl (gitignored)
 ```
 
-## Integration points (for the Slack / OpenClaw work)
+## Slack via OpenClaw / NemoClaw / OpenShell
 
-- `GET  /api/incidents?status=OPEN`: open incidents with ranked plans; `summary` is ready-to-post text
-- `GET  /api/outbox?status=queued`: dispatcher notifications and driver messages waiting to be delivered
-- `POST /api/plans/{plan_id}/approve {"actor": "slack:U123"}` → `approval_token`
-- `POST /api/plans/{plan_id}/execute {"approval_token", "idempotency_key"}`
-- `POST /api/plans/{plan_id}/reject {"actor", "reason"}`
-- `POST /api/agent/chat {"message", "incident_id"?}`: local agent with read-only tools
-- `POST /api/events`: push any event; `POST /api/intake/text`, `POST /api/intake/document` (multipart)
-- `GET  /api/incidents/{id}/trace`: inputs, policy versions, tool outputs, approvals
+Dispatchers talk to the system in Slack through an OpenClaw agent running in a NemoClaw sandbox
+(`dispatch-guardian`, local Qwen3.6 via vLLM). OpenShell confines the sandbox's egress.
 
-The server binds to 127.0.0.1. To reach it from the OpenClaw sandbox, bind to the docker bridge
-(`--host 0.0.0.0` or `172.18.0.1`) and allow that host:port in the OpenShell egress policy.
+```
+Slack <-> OpenClaw (sandbox, NemoClaw) --curl, OpenShell policy--> Dispatch Guardian API :8090 (host)
+```
+
+- **Skill:** `integrations/openclaw/dispatch-guardian/` (`SKILL.md` + `dg.sh`): brief, incident, ask, approve, simulate.
+- **Network policy:** `integrations/openclaw/dispatch-guardian-api.yaml` allows only `curl` to reach four routes on
+  `host.openshell.internal:8090` (`/api/chat/**`, chat approvals, `/api/agent/chat`, scenario injection).
+- **Auth:** the API accepts unauthenticated requests only from this machine. Everything else needs
+  `Authorization: Bearer $DG_API_TOKEN` (generated into the git-ignored `.env`; the sandbox copy is `dg.env`).
+- **Approvals from Slack** carry the human's Slack ID (`slack:U...`) and go through the same re-validation and audit as the dashboard.
+
+Set up or refresh (run with Docker group access):
+```bash
+.venv/bin/uvicorn app.api.main:app --host 0.0.0.0 --port 8090   # token-protected off-box
+nemoclaw dispatch-guardian policy add --from-file integrations/openclaw/dispatch-guardian-api.yaml --yes
+printf 'DG_API_TOKEN=%s\n' "$(grep ^DG_API_TOKEN= .env | cut -d= -f2-)" > integrations/openclaw/dispatch-guardian/dg.env
+nemoclaw dispatch-guardian skill install integrations/openclaw/dispatch-guardian
+```
+
+Fallback: `app/integrations/slack_bridge.py` is a direct Socket Mode bridge (incident cards with Approve buttons).
+It turns on when `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN` and `SLACK_CHANNEL` are set. Don't run both on the same Slack app.
+
+Other API endpoints: `GET /api/incidents`, `POST /api/plans/{id}/approve` and `/execute`, `POST /api/events`,
+`POST /api/intake/text`, `POST /api/intake/document`, `GET /api/incidents/{id}/trace`, `GET /api/outbox`.
 
 ## Known limits of this base version
 

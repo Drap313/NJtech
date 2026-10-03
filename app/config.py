@@ -10,6 +10,20 @@ from typing import Any
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def _load_dotenv(path: Path) -> None:
+    """Minimal KEY=VALUE loader for local secrets (.env is git-ignored). Real env vars win."""
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
+_load_dotenv(ROOT / ".env")
 CONFIG_DIR = ROOT / "config"
 SYNTHETIC_DIR = ROOT / "data" / "synthetic"
 RUNTIME_DIR = Path(os.environ.get("DG_RUNTIME_DIR", ROOT / "data" / "runtime"))

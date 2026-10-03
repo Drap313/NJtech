@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import secrets
 import threading
 import time
 import uuid
@@ -74,12 +75,32 @@ async def lifespan(app: FastAPI):
         ctx.reset()
     if os.environ.get("DG_RUNTIME", "1") != "0":
         ctx.runtime.start()
+    from ..integrations.slack_bridge import SlackBridge
+    ctx.slack = SlackBridge(ctx)
+    ctx.slack.start()
     yield
+    ctx.slack.stop()
     ctx.runtime.stop()
 
 
 app = FastAPI(title="Dispatch Guardian", version="0.1.0", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
+
+LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+
+
+@app.middleware("http")
+async def require_token_off_box(request, call_next):
+    """Requests from this machine (dashboard via SSH tunnel) pass; anything else,
+    e.g. the OpenClaw sandbox, must present DG_API_TOKEN as a bearer token."""
+    from fastapi.responses import JSONResponse
+    client = request.client.host if request.client else ""
+    if client not in LOOPBACK:
+        token = os.environ.get("DG_API_TOKEN", "")
+        sent = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
+        if not token or not secrets.compare_digest(sent, token):
+            return JSONResponse({"detail": "unauthorized"}, status_code=401)
+    return await call_next(request)
 
 
 def C() -> Ctx:
@@ -483,8 +504,87 @@ def audit(limit: int = 100):
     return C().store.audit_recent(limit)
 
 
+@app.get("/api/integrations/slack")
+def slack_status():
+    sl = getattr(C(), "slack", None)
+    return sl.status if sl else {"enabled": False}
+
+
+# ---------------------------------------------------------------- chat-agent (OpenClaw / Slack) text views
+from fastapi.responses import PlainTextResponse  # noqa: E402
+
+
+def _plan_line(p: dict) -> str:
+    s = p["appointment_slack_minutes"]
+    when = f"on time ({s} min slack)" if s is not None and s >= 0 else f"LATE by {service._hm(s or 0)}"
+    return (f"[{p['plan_id']}] {p['title']}: {p['compliance_verdict']}, {when}, legal reserve {p["hos_reserve_minutes"] if p["hos_reserve_minutes"] is not None else "n/a"} min, "
+            f"+${p['incremental_cost']:,.0f}, risk {p['risk_score']} ({p['risk_band']})")
+
+
+@app.get("/api/chat/brief", response_class=PlainTextResponse)
+def chat_brief():
+    """Open incidents in a few lines, for a chat agent to relay."""
+    c = C()
+    open_ = c.store.list_incidents("OPEN")
+    now = c.clock.now()
+    head = f"Dispatch Guardian, sim time {service._clock(now.isoformat())}. {len(open_)} open incident(s)."
+    if not open_:
+        return head + " All active loads are legal with slack."
+    lines = [head]
+    for i in open_:
+        lines.append(f"- {i['id']} {i['severity']}: {i['title']} Cause: {i['cause']}.")
+        if i.get("plans"):
+            lines.append(f"  Recommended {_plan_line(i['plans'][0])}")
+    return "\n".join(lines)
+
+
+@app.get("/api/chat/incidents/{incident_id}", response_class=PlainTextResponse)
+def chat_incident(incident_id: str):
+    c = C()
+    i = c.store.get_incident(incident_id)
+    if not i:
+        raise HTTPException(404, "unknown incident")
+    lines = [service.summary_text(i, c.clock.now()), "", "Options (approve by plan id):"]
+    lines += [f"- {_plan_line(p)}" for p in i.get("plans", [])]
+    if i.get("rejected"):
+        lines.append("Excluded by hard rules: " + "; ".join(f"{r['title']} ({', '.join(r['codes'])})" for r in i["rejected"][:6]))
+    return "\n".join(lines)
+
+
+@app.get("/api/chat/feed", response_class=PlainTextResponse)
+def chat_feed(ack: bool = True):
+    """New dispatcher notifications since the last call (marks them delivered). Empty string when nothing is new."""
+    c = C()
+    rows = [r for r in reversed(c.store.outbox_list(50, "queued")) if r["channel"] == "dispatcher"]
+    if ack:
+        for r in rows:
+            c.store.outbox_set_status(r["id"], "sent")
+    return "\n\n".join(r["body"] for r in rows)
+
+
+class ChatApprove(BaseModel):
+    actor: str
+
+
+@app.post("/api/chat/plans/{plan_id}/approve", response_class=PlainTextResponse)
+def chat_approve(plan_id: str, body: ChatApprove):
+    """Approval relayed from a chat user. The actor must name the human (e.g. slack:U123), never the agent."""
+    c = C()
+    if not body.actor.startswith("slack:"):
+        raise HTTPException(400, "actor must identify the Slack user who approved, e.g. slack:U0123ABC")
+    try:
+        tok = service.approve_plan(c.store, c.clock, plan_id, body.actor)
+        res = service.execute_approved_plan(c.store, c.clock, plan_id, tok["approval_token"], f"chat:{plan_id}")
+    except service.ApprovalError as e:
+        return PlainTextResponse(f"NOT EXECUTED: {e}", status_code=409)
+    c.engine.sweep()
+    rv = res["revalidation"]
+    return (f"EXECUTED {plan_id} (approved by {body.actor}). Re-validated {rv['verdict']}; delivery {service._clock(rv['delivery_eta'])}, "
+            f"{rv['appointment_slack_minutes']} min slack.\n" + "\n".join("- " + x for x in res["changes"]))
+
+
 @app.get("/api/health")
 def health():
     c = C()
-    return {"api": "ok", **c.health(), "runtime": {"ticks": c.runtime.ticks, "last_error": c.runtime.last_error},
+    return {"api": "ok", **c.health(), "slack": getattr(c, "slack", None) and c.slack.status, "runtime": {"ticks": c.runtime.ticks, "last_error": c.runtime.last_error},
             "clock": c.clock.status(), "policy_versions": policy_versions()}

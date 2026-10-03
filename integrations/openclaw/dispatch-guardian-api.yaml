@@ -1,0 +1,26 @@
+# OpenShell network policy preset: lets the dispatch-guardian sandbox reach the
+# Dispatch Guardian API on the GB10 host, and nothing else on that port.
+# Apply: nemoclaw dispatch-guardian policy add --from-file integrations/openclaw/dispatch-guardian-api.yaml --yes
+preset:
+  name: dispatch-guardian-api
+  description: "Dispatch Guardian API on the GB10 host (chat views, approvals relayed from Slack, local agent)"
+
+network_policies:
+  dispatch_guardian_api:
+    name: dispatch_guardian_api
+    endpoints:
+      - host: host.openshell.internal
+        port: 8090
+        protocol: rest
+        enforcement: enforce
+        allowed_ips:
+          # host.openshell.internal is the docker bridge gateway (private IP); the
+          # bridge endpoint is the one case where allowed_ips is permitted.
+          - 172.16.0.0/12
+        rules:
+          - allow: { method: GET, path: "/api/chat/**" }
+          - allow: { method: POST, path: "/api/chat/plans/*/approve" }
+          - allow: { method: POST, path: "/api/agent/chat" }
+          - allow: { method: POST, path: "/api/scenarios/*/inject" }
+    binaries:
+      - { path: /usr/bin/curl }

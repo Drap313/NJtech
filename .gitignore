@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 data/runtime/
 .pytest_cache/
+.env
+integrations/openclaw/dispatch-guardian/dg.env
