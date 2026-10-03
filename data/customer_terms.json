@@ -1,0 +1,39 @@
+[
+ {
+  "customer_id": "CUST-STC",
+  "name": "Sterling City Terminal",
+  "grace_period_minutes": 15,
+  "late_penalty_per_hour": 150.0,
+  "appointment_change_policy": "24h notice required",
+  "notification_requirement_minutes": 30,
+  "contact_name": "D. Weller",
+  "contact_phone": "432-555-0118",
+  "special_site_requirements": [
+   "high_value_customer"
+  ]
+ },
+ {
+  "customer_id": "CUST-BSS",
+  "name": "Big Spring Station",
+  "grace_period_minutes": 20,
+  "late_penalty_per_hour": 100.0,
+  "appointment_change_policy": "flexible, call ahead",
+  "notification_requirement_minutes": 15,
+  "contact_name": "R. Okafor",
+  "contact_phone": "432-555-0164",
+  "special_site_requirements": []
+ },
+ {
+  "customer_id": "CUST-CBP",
+  "name": "Carlsbad Plant",
+  "grace_period_minutes": 10,
+  "late_penalty_per_hour": 120.0,
+  "appointment_change_policy": "strict, no changes within 4h",
+  "notification_requirement_minutes": 60,
+  "contact_name": "M. Ibarra",
+  "contact_phone": "575-555-0142",
+  "special_site_requirements": [
+   "hazmat_escort_required"
+  ]
+ }
+]

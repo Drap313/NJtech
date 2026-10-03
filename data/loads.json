@@ -1,0 +1,258 @@
+[
+ {
+  "id": "4417",
+  "customer": "CUST-STC",
+  "origin": "Pecos Yard",
+  "destination": "Sterling City Terminal",
+  "pickup_window_start": "2026-10-03T02:00:00",
+  "pickup_window_end": "2026-10-03T02:30:00",
+  "delivery_window_start": "2026-10-03T05:30:00",
+  "delivery_window_end": "2026-10-03T06:30:00",
+  "estimated_loading_minutes": 30,
+  "estimated_unloading_minutes": 30,
+  "cargo_type": "unleaded gasoline",
+  "weight_lb": 56000,
+  "required_trailer_type": "tanker",
+  "required_vehicle_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "required_driver_endorsements": [
+   "tanker",
+   "hazmat"
+  ],
+  "revenue": 1450.0,
+  "late_penalty_per_hour": 150.0,
+  "unserved_penalty": 2000.0,
+  "status": "active",
+  "assigned_driver": "ramirez",
+  "assigned_vehicle": "V-01",
+  "assigned_trailer": "TR-01"
+ },
+ {
+  "id": "4418",
+  "customer": "CUST-BSS",
+  "origin": "Midland Terminal",
+  "destination": "Big Spring Station",
+  "pickup_window_start": "2026-10-03T02:00:00",
+  "pickup_window_end": "2026-10-03T05:00:00",
+  "delivery_window_start": "2026-10-03T06:00:00",
+  "delivery_window_end": "2026-10-03T08:00:00",
+  "estimated_loading_minutes": 20,
+  "estimated_unloading_minutes": 20,
+  "cargo_type": "diesel",
+  "weight_lb": 48000,
+  "required_trailer_type": "tanker",
+  "required_vehicle_capabilities": [
+   "tanker_compatible"
+  ],
+  "required_driver_endorsements": [
+   "tanker"
+  ],
+  "revenue": 420.0,
+  "late_penalty_per_hour": 100.0,
+  "unserved_penalty": 700.0,
+  "status": "active",
+  "assigned_driver": "johnson",
+  "assigned_vehicle": "V-04",
+  "assigned_trailer": "TR-09"
+ },
+ {
+  "id": "4419",
+  "customer": "CUST-CBP",
+  "origin": "Pecos Yard",
+  "destination": "Carlsbad Plant",
+  "pickup_window_start": "2026-10-03T02:00:00",
+  "pickup_window_end": "2026-10-03T03:00:00",
+  "delivery_window_start": "2026-10-03T06:00:00",
+  "delivery_window_end": "2026-10-03T07:00:00",
+  "estimated_loading_minutes": 25,
+  "estimated_unloading_minutes": 25,
+  "cargo_type": "diesel",
+  "weight_lb": 50000,
+  "required_trailer_type": "tanker",
+  "required_vehicle_capabilities": [
+   "tanker_compatible"
+  ],
+  "required_driver_endorsements": [
+   "tanker"
+  ],
+  "revenue": 980.0,
+  "late_penalty_per_hour": 120.0,
+  "unserved_penalty": 1500.0,
+  "status": "active",
+  "assigned_driver": "nguyen",
+  "assigned_vehicle": "V-10",
+  "assigned_trailer": "TR-02"
+ },
+ {
+  "id": "4420",
+  "customer": "CUST-STC",
+  "origin": "Big Lake Yard",
+  "destination": "Sterling City Terminal",
+  "pickup_window_start": "2026-10-03T02:00:00",
+  "pickup_window_end": "2026-10-03T03:30:00",
+  "delivery_window_start": "2026-10-03T05:30:00",
+  "delivery_window_end": "2026-10-03T07:00:00",
+  "estimated_loading_minutes": 20,
+  "estimated_unloading_minutes": 20,
+  "cargo_type": "unleaded gasoline",
+  "weight_lb": 54000,
+  "required_trailer_type": "tanker",
+  "required_vehicle_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "required_driver_endorsements": [
+   "tanker",
+   "hazmat"
+  ],
+  "revenue": 610.0,
+  "late_penalty_per_hour": 150.0,
+  "unserved_penalty": 900.0,
+  "status": "active",
+  "assigned_driver": "silva",
+  "assigned_vehicle": "V-05",
+  "assigned_trailer": "TR-03"
+ },
+ {
+  "id": "4421",
+  "customer": "CUST-STC",
+  "origin": "Big Lake Yard",
+  "destination": "Sterling City Terminal",
+  "pickup_window_start": "2026-10-03T02:00:00",
+  "pickup_window_end": "2026-10-03T03:00:00",
+  "delivery_window_start": "2026-10-03T05:00:00",
+  "delivery_window_end": "2026-10-03T07:00:00",
+  "estimated_loading_minutes": 20,
+  "estimated_unloading_minutes": 20,
+  "cargo_type": "unleaded gasoline",
+  "weight_lb": 55000,
+  "required_trailer_type": "tanker",
+  "required_vehicle_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "required_driver_endorsements": [
+   "tanker",
+   "hazmat"
+  ],
+  "revenue": 640.0,
+  "late_penalty_per_hour": 150.0,
+  "unserved_penalty": 950.0,
+  "status": "active",
+  "assigned_driver": "davis",
+  "assigned_vehicle": "V-09",
+  "assigned_trailer": null
+ },
+ {
+  "id": "4422",
+  "customer": "CUST-BSS",
+  "origin": "Monahans",
+  "destination": "Big Spring Station",
+  "pickup_window_start": "2026-10-03T02:00:00",
+  "pickup_window_end": "2026-10-03T03:00:00",
+  "delivery_window_start": "2026-10-03T05:30:00",
+  "delivery_window_end": "2026-10-03T07:30:00",
+  "estimated_loading_minutes": 20,
+  "estimated_unloading_minutes": 20,
+  "cargo_type": "diesel",
+  "weight_lb": 46000,
+  "required_trailer_type": "tanker",
+  "required_vehicle_capabilities": [
+   "tanker_compatible"
+  ],
+  "required_driver_endorsements": [
+   "tanker"
+  ],
+  "revenue": 390.0,
+  "late_penalty_per_hour": 100.0,
+  "unserved_penalty": 650.0,
+  "status": "active",
+  "assigned_driver": "hart",
+  "assigned_vehicle": "V-06",
+  "assigned_trailer": null
+ },
+ {
+  "id": "4423",
+  "customer": "CUST-BSS",
+  "origin": "Midland Terminal",
+  "destination": "Big Spring Station",
+  "pickup_window_start": "2026-10-03T04:00:00",
+  "pickup_window_end": "2026-10-03T06:00:00",
+  "delivery_window_start": "2026-10-03T07:00:00",
+  "delivery_window_end": "2026-10-03T09:00:00",
+  "estimated_loading_minutes": 30,
+  "estimated_unloading_minutes": 30,
+  "cargo_type": "refrigerated produce",
+  "weight_lb": 38000,
+  "required_trailer_type": "reefer",
+  "required_vehicle_capabilities": [
+   "reefer_power"
+  ],
+  "required_driver_endorsements": [],
+  "revenue": 720.0,
+  "late_penalty_per_hour": 90.0,
+  "unserved_penalty": 1100.0,
+  "status": "proposed",
+  "assigned_driver": null,
+  "assigned_vehicle": null,
+  "assigned_trailer": null
+ },
+ {
+  "id": "4424",
+  "customer": "CUST-CBP",
+  "origin": "Monahans",
+  "destination": "Midland Terminal",
+  "pickup_window_start": "2026-10-03T03:00:00",
+  "pickup_window_end": "2026-10-03T07:00:00",
+  "delivery_window_start": "2026-10-03T06:00:00",
+  "delivery_window_end": "2026-10-03T10:00:00",
+  "estimated_loading_minutes": 45,
+  "estimated_unloading_minutes": 45,
+  "cargo_type": "pipe and fittings",
+  "weight_lb": 42000,
+  "required_trailer_type": "flatbed",
+  "required_vehicle_capabilities": [
+   "flatbed_compatible"
+  ],
+  "required_driver_endorsements": [],
+  "revenue": 560.0,
+  "late_penalty_per_hour": 70.0,
+  "unserved_penalty": 800.0,
+  "status": "proposed",
+  "assigned_driver": null,
+  "assigned_vehicle": null,
+  "assigned_trailer": null
+ },
+ {
+  "id": "4425",
+  "customer": "CUST-STC",
+  "origin": "Pecos Yard",
+  "destination": "Sterling City Terminal",
+  "pickup_window_start": "2026-10-03T03:30:00",
+  "pickup_window_end": "2026-10-03T04:30:00",
+  "delivery_window_start": "2026-10-03T07:00:00",
+  "delivery_window_end": "2026-10-03T08:00:00",
+  "estimated_loading_minutes": 20,
+  "estimated_unloading_minutes": 20,
+  "cargo_type": "unleaded gasoline",
+  "weight_lb": 30000,
+  "required_trailer_type": "tanker",
+  "required_vehicle_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "required_driver_endorsements": [
+   "tanker",
+   "hazmat"
+  ],
+  "revenue": 260.0,
+  "late_penalty_per_hour": 150.0,
+  "unserved_penalty": 500.0,
+  "status": "proposed",
+  "assigned_driver": null,
+  "assigned_vehicle": null,
+  "assigned_trailer": null
+ }
+]

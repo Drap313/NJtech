@@ -1,0 +1,157 @@
+[
+ {
+  "id": "V-01",
+  "type": "tractor",
+  "make": "Kenworth",
+  "model": "T880",
+  "current_location": "Pecos Yard",
+  "status": "assigned",
+  "assigned_driver": "ramirez",
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-02",
+  "type": "tractor",
+  "make": "Peterbilt",
+  "model": "567",
+  "current_location": "Odessa",
+  "status": "available",
+  "assigned_driver": null,
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-03",
+  "type": "tractor",
+  "make": "Freightliner",
+  "model": "Cascadia",
+  "current_location": "Pecos Yard",
+  "status": "available",
+  "assigned_driver": null,
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "dry_van_compatible"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-04",
+  "type": "tractor",
+  "make": "Volvo",
+  "model": "VNL",
+  "current_location": "Midland Terminal",
+  "status": "assigned",
+  "assigned_driver": "johnson",
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "tanker_compatible"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-05",
+  "type": "tractor",
+  "make": "Peterbilt",
+  "model": "348",
+  "current_location": "Big Lake Yard",
+  "status": "assigned",
+  "assigned_driver": "silva",
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-06",
+  "type": "tractor",
+  "make": "Western Star",
+  "model": "5700XE",
+  "current_location": "Monahans",
+  "status": "assigned",
+  "assigned_driver": "hart",
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "flatbed_compatible",
+   "tanker_compatible"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-07",
+  "type": "tractor",
+  "make": "Kenworth",
+  "model": "T680",
+  "current_location": "Odessa",
+  "status": "available",
+  "assigned_driver": null,
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "reefer_power"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-08",
+  "type": "tractor",
+  "make": "Peterbilt",
+  "model": "579",
+  "current_location": "Pecos Yard",
+  "status": "shop",
+  "assigned_driver": null,
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "dry_van_compatible"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-09",
+  "type": "tractor",
+  "make": "Kenworth",
+  "model": "T880",
+  "current_location": "Big Lake Yard",
+  "status": "assigned",
+  "assigned_driver": "davis",
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ },
+ {
+  "id": "V-10",
+  "type": "tractor",
+  "make": "Peterbilt",
+  "model": "567",
+  "current_location": "Pecos Yard",
+  "status": "assigned",
+  "assigned_driver": "nguyen",
+  "gross_weight_class": "Class 8",
+  "equipment_capabilities": [
+   "tanker_compatible"
+  ],
+  "restrictions": [],
+  "last_location_update": "2026-10-03T01:58:00"
+ }
+]

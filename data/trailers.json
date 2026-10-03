@@ -1,0 +1,175 @@
+[
+ {
+  "id": "TR-01",
+  "type": "tanker",
+  "current_location": "Pecos Yard",
+  "status": "assigned",
+  "capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "restrictions": [],
+  "spec": {
+   "code": "DOT 406",
+   "capacity_gal": 9200,
+   "compartments": 5,
+   "compartment_gal": [
+    3100,
+    1250,
+    1100,
+    1100,
+    2650
+   ],
+   "gvwr_lb": 66000
+  }
+ },
+ {
+  "id": "TR-02",
+  "type": "tanker",
+  "current_location": "Odessa",
+  "status": "available",
+  "capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "restrictions": [],
+  "spec": {
+   "code": "DOT 406",
+   "capacity_gal": 9500,
+   "compartments": 4,
+   "compartment_gal": [
+    3500,
+    2000,
+    1200,
+    2800
+   ],
+   "gvwr_lb": 66000
+  }
+ },
+ {
+  "id": "TR-03",
+  "type": "tanker",
+  "current_location": "Big Lake Yard",
+  "status": "assigned",
+  "capabilities": [
+   "tanker_compatible",
+   "hazmat_rated"
+  ],
+  "restrictions": [],
+  "spec": {
+   "code": "DOT 406",
+   "capacity_gal": 9200,
+   "compartments": 5,
+   "compartment_gal": [
+    3100,
+    1250,
+    1100,
+    1100,
+    2650
+   ],
+   "gvwr_lb": 66000
+  }
+ },
+ {
+  "id": "TR-04",
+  "type": "dry_van",
+  "current_location": "Pecos Yard",
+  "status": "available",
+  "capabilities": [
+   "dry_van_compatible"
+  ],
+  "restrictions": [],
+  "spec": {
+   "length_ft": 53
+  }
+ },
+ {
+  "id": "TR-05",
+  "type": "reefer",
+  "current_location": "Midland Terminal",
+  "status": "available",
+  "capabilities": [
+   "reefer_power"
+  ],
+  "restrictions": [],
+  "spec": {
+   "length_ft": 53,
+   "reefer_power_required": true
+  }
+ },
+ {
+  "id": "TR-06",
+  "type": "flatbed",
+  "current_location": "Monahans",
+  "status": "available",
+  "capabilities": [
+   "flatbed_compatible"
+  ],
+  "restrictions": [],
+  "spec": {
+   "length_ft": 48
+  }
+ },
+ {
+  "id": "TR-07",
+  "type": "container_chassis",
+  "current_location": "Odessa",
+  "status": "available",
+  "capabilities": [
+   "container_compatible"
+  ],
+  "restrictions": [],
+  "spec": {
+   "length_ft": 40
+  }
+ },
+ {
+  "id": "TR-08",
+  "type": "specialized",
+  "current_location": "Pecos Yard",
+  "status": "available",
+  "capabilities": [
+   "heavy_haul"
+  ],
+  "restrictions": [],
+  "spec": {
+   "notes": "lowboy"
+  }
+ },
+ {
+  "id": "TR-09",
+  "type": "tanker",
+  "current_location": "Midland Terminal",
+  "status": "assigned",
+  "capabilities": [
+   "tanker_compatible"
+  ],
+  "restrictions": [],
+  "spec": {
+   "code": "DOT 406",
+   "capacity_gal": 9200,
+   "compartments": 5,
+   "compartment_gal": [
+    3100,
+    1250,
+    1100,
+    1100,
+    2650
+   ],
+   "gvwr_lb": 66000
+  }
+ },
+ {
+  "id": "TR-10",
+  "type": "dry_van",
+  "current_location": "Midland Terminal",
+  "status": "shop",
+  "capabilities": [
+   "dry_van_compatible"
+  ],
+  "restrictions": [],
+  "spec": {
+   "length_ft": 53
+  }
+ }
+]
