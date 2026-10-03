@@ -6,134 +6,100 @@ import PaperBackground from '@/components/PaperBackground';
 import { LinesPatternCard, LinesPatternCardBody } from '@/components/ui/card-with-lines-pattern';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-const stakesCards = [
+const dispatchCounters = [
+  { value: '1', label: 'dispatcher' },
+  { value: '40', label: 'trucks' },
+  { value: '40', label: 'drivers' },
+];
+
+const dispatchChips = [
+  'Active loads',
+  'Upcoming loads',
+  'Deadlines',
+  'Routes',
+  'Driver status',
+  'Legal limits',
+  'Locations',
+  'ETAs',
+];
+
+const industryCards = [
   {
-    number: '$450K',
-    text: 'Average payout when an ordinary truck crash becomes a claim. Not the headline verdict — the common case, and the one a small fleet actually meets.',
-    citation: '(ATRI, 600+ cases settled under $1M, 2021).',
+    number: '$906B',
+    text: 'US trucking revenue in a year — roughly three quarters of everything the country moves by freight.',
+    citation: '(American Trucking Associations, 2024).',
     numberClassName: 'text-[#5fd6e4]',
     borderClassName: 'border-[#5fd6e4]/25',
     shadowClassName: 'shadow-[0_30px_80px_rgba(95,214,228,0.12)]',
   },
   {
-    number: '$3.6M',
-    text: 'Median verdict once a case crosses $1M in state court. An hours-of-service violation is what moves a case from the first number to this one.',
-    citation: '(ATRI Trucking Litigation: A Forensic Analysis, 2025).',
+    number: 'Under 1%',
+    text: 'Operating margin on a record $2.336 per mile to run a truck. Enormous revenue, almost nothing kept.',
+    citation: '(ATRI Operational Costs of Trucking, 2025).',
     numberClassName: 'text-[#e4b24d]',
     borderClassName: 'border-[#e4b24d]/25',
     shadowClassName: 'shadow-[0_30px_80px_rgba(228,178,77,0.12)]',
   },
   {
-    number: '$10M',
-    text: 'Fatal-crash verdict that ended a 115-truck carrier. It "far exceeded the amount of liability insurance and reserves." Chapter 11, four months later.',
-    citation: '(Marvin Keller Trucking, 2022).',
+    number: '$108.8B',
+    text: 'Lost to delay every year — $7,588 of it per truck, before a single fine or claim.',
+    citation: '(ATRI Cost of Congestion; record high, +15% year over year).',
     numberClassName: 'text-destructive',
     borderClassName: 'border-destructive/25',
     shadowClassName: 'shadow-[0_30px_80px_rgba(255,79,79,0.10)]',
   },
 ];
 
-const ingestChips = [
-  'Driver roster',
-  'Hours worked',
-  'Legal limits',
-  'Active loads',
-  'Planned loads',
-  'Driver status',
-  'Truck location',
-  'ETAs',
-];
-
-const workflowSteps = [
-  { title: 'Fleet Event', borderClassName: 'border-primary/30', arrowClassName: 'text-primary' },
-  { title: 'Rule Check', borderClassName: 'border-secondary/30', arrowClassName: 'text-secondary' },
-  { title: 'Recovery Solver', borderClassName: 'border-accent/30', arrowClassName: 'text-accent' },
-  { title: 'Slack Approval', borderClassName: 'border-destructive/30', arrowClassName: 'text-destructive' },
-];
-
-const workflowArtifacts = [
+const engineLayers = [
   {
-    title: 'Rule Trace',
-    text: 'The exact constraint that failed — drive clock, duty window, cycle, break.',
-    citation: '(Compliance engine, 49 CFR 395.3 ruleset).',
+    title: 'Rules layer',
+    subtitle: 'Deterministic',
+    text: 'The 49 CFR 395.3 clocks, in Python. What is legal is never a guess, and never the model’s job.',
     accentClassName: 'text-primary',
     borderClassName: 'border-primary/30',
     bgClassName: 'bg-primary/10',
   },
   {
-    title: 'Costed Alternatives',
-    text: 'Ranked legal options — swap driver, delay, split — each with ETA and cost delta.',
-    citation: '(Recovery solver + cost model).',
+    title: 'Local model',
+    subtitle: 'Qwen3.6-35B on the GB10',
+    text: 'The operational trade-offs: reroute, reassign, or accept the delay — whichever actually costs less.',
     accentClassName: 'text-secondary',
     borderClassName: 'border-secondary/30',
     bgClassName: 'bg-secondary/10',
   },
-  {
-    title: 'Incident Lifecycle',
-    text: 'A delay or stale feed opens an incident and re-evaluates the assignment as reality changes.',
-    citation: '(Event-driven — always on, not chat-driven).',
-    accentClassName: 'text-accent',
-    borderClassName: 'border-accent/30',
-    bgClassName: 'bg-accent/10',
-  },
-  {
-    title: 'Audit Trail',
-    text: 'Every approval and override logged with a named approver. Append-only.',
-    citation: '(What an auditor, an underwriter, and a jury ask for first).',
-    accentClassName: 'text-destructive',
-    borderClassName: 'border-destructive/30',
-    bgClassName: 'bg-destructive/10',
-  },
 ];
 
-const stackCards = [
-  {
-    title: 'Understands the incident',
-    text: 'Qwen3.6-35B-A3B (NVFP4) on vLLM, local on the GB10. Reads what broke and says which constraint failed, in plain language.',
-    accentClassName: 'text-primary',
-    borderClassName: 'border-primary/30',
-    bgClassName: 'bg-primary/10',
-  },
-  {
-    title: 'Compares the options',
-    text: 'Ranks the legal recoveries against each other by cost and ETA. The dispatcher gets a decision, not another dashboard to read.',
-    accentClassName: 'text-secondary',
-    borderClassName: 'border-secondary/30',
-    bgClassName: 'bg-secondary/10',
-  },
-  {
-    title: 'Extends the dispatcher',
-    text: 'One dispatcher covers more loads without losing track of any of them. The bandwidth goes up; the headcount does not.',
-    accentClassName: 'text-accent',
-    borderClassName: 'border-accent/30',
-    bgClassName: 'bg-accent/10',
-  },
+const comparisonColumns = ['ELD / Telematics', 'Enterprise TMS', 'Dispatch Guardian'];
+
+const comparisonRows: { capability: string; values: ('yes' | 'no' | 'partial' | string)[] }[] = [
+  { capability: 'Logs hours of service', values: ['yes', 'no', 'yes'] },
+  { capability: 'Builds the plan up front', values: ['no', 'yes', 'yes'] },
+  { capability: 'Re-checks it when reality changes', values: ['no', 'no', 'yes'] },
+  { capability: 'Ranks recovery options by cost', values: ['no', 'no', 'yes'] },
+  { capability: 'Acts before the violation', values: ['after the fact', 'no', 'yes'] },
+  { capability: 'Runs on your own hardware', values: ['no', 'no', 'yes'] },
+  { capability: 'Named approver + audit trail', values: ['no', 'partial', 'yes'] },
 ];
 
-const eldCards = [
-  {
-    title: 'Inflexible',
-    text: 'Hardware in every cab, multi-year contracts, one vendor’s roadmap. It logs the rule it was built for and nothing else.',
-    accentClassName: 'text-destructive',
-    borderClassName: 'border-destructive/30',
-    bgClassName: 'bg-destructive/10',
-  },
-  {
-    title: 'Costly',
-    text: '$19-25 per truck per month before telematics, plus hardware per vehicle — to be told what already happened.',
-    accentClassName: 'text-[#e4b24d]',
-    borderClassName: 'border-[#e4b24d]/30',
-    bgClassName: 'bg-[#e4b24d]/10',
-  },
-  {
-    title: 'Not local',
-    text: 'The log lives in the vendor’s cloud, under the vendor’s terms — and underwriters already read it as a pricing input.',
-    accentClassName: 'text-[#5fd6e4]',
-    borderClassName: 'border-[#5fd6e4]/30',
-    bgClassName: 'bg-[#5fd6e4]/10',
-  },
+const comparisonMetrics = [
+  { label: 'Cost', values: ['$19-50 /truck/mo + hardware', '$10K-100K+ to implement', '$29-39 /truck/mo, no hardware'] },
+  { label: 'Commitment', values: ['1-3 year contract', 'Multi-year', 'Month to month'] },
+  { label: 'Where the data lives', values: ['Vendor cloud', 'Vendor cloud', 'Your box'] },
+  { label: 'Time to a decision', values: ['—', '—', '1-5 minutes'] },
 ];
 
+const ComparisonCell = ({ value, highlight }: { value: string; highlight?: boolean }) => {
+  if (value === 'yes') {
+    return <span className={`text-xl font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>✓</span>;
+  }
+  if (value === 'no') {
+    return <span className="text-xl font-bold text-muted-foreground/40">—</span>;
+  }
+  if (value === 'partial') {
+    return <span className="text-sm text-muted-foreground">partial</span>;
+  }
+  return <span className="text-xs md:text-sm text-muted-foreground">{value}</span>;
+};
 
 const Citation = ({ text, className = '' }: { text: string; className?: string }) => (
   <p className={`mt-4 text-xs leading-relaxed tracking-wide text-muted-foreground/70 ${className}`}>
@@ -141,14 +107,66 @@ const Citation = ({ text, className = '' }: { text: string; className?: string }
   </p>
 );
 
+/**
+ * Shows the image at `src` once that file exists in public/.
+ * Until then (or if it fails to load) it renders a labelled placeholder
+ * naming the exact filename to drop in — no code change needed.
+ */
+const ScreenshotSlot = ({
+  label,
+  src,
+  caption,
+  className = '',
+}: {
+  label: string;
+  src: string;
+  caption?: string;
+  className?: string;
+}) => {
+  const [failed, setFailed] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div
+        className={`relative overflow-hidden rounded-xl border bg-card/60 ${
+          failed ? 'border-2 border-dashed border-primary/30' : 'border-border shadow-2xl'
+        } ${className}`}
+      >
+        {failed ? (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-5 text-center">
+            <span className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[0.6rem] font-mono uppercase tracking-[0.2em] text-primary">
+              screenshot
+            </span>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <code className="text-[0.65rem] text-muted-foreground/60">public{src}</code>
+          </div>
+        ) : (
+          <img
+            src={src}
+            alt={label}
+            onError={() => setFailed(true)}
+            className="h-full w-full object-contain"
+          />
+        )}
+      </div>
+      {caption && (
+        <p className="text-center text-xs md:text-sm text-muted-foreground">{caption}</p>
+      )}
+    </div>
+  );
+};
+
 const MAIN_NAV_ITEMS = [
   { label: 'Home', id: 'home' },
-  { label: 'Problem', id: 'problem' },
-  { label: 'Stakes', id: 'stakes' },
-  { label: 'Guardian', id: 'how-it-works' },
-  { label: 'Stack', id: 'stack' },
-  { label: 'ELD', id: 'eld' },
-  { label: 'Conclusion', id: 'conclusion' },
+  { label: 'Dispatch', id: 'dispatch' },
+  { label: 'Industry', id: 'industry' },
+  { label: 'Impact', id: 'impact' },
+  { label: 'Guardian', id: 'guardian' },
+  { label: 'Engine', id: 'engine' },
+  { label: 'Demo', id: 'demo' },
+  { label: 'Slack', id: 'approval' },
+  { label: 'Compare', id: 'compare' },
+  { label: 'Close', id: 'conclusion' },
 ];
 
 const SECTION_IDS = MAIN_NAV_ITEMS.map((item) => item.id);
@@ -325,267 +343,369 @@ const Index = () => {
           </div>
         </Section>
 
-        <Section id="problem" className="bg-transparent" contentClassName="max-w-6xl py-8">
-          <div className="space-y-8">
-            <motion.div
+        <Section id="dispatch" className="bg-transparent" contentClassName="max-w-6xl py-8">
+          <div className="space-y-8 text-center">
+            <motion.h2
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: false, amount: 0.35 }}
-              className="mx-auto max-w-6xl text-center"
+              className="text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
             >
-              <h2 className="text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl">
-                The hours are the driver&rsquo;s. <span className="text-destructive">The liability is the company&rsquo;s.</span>
-              </h2>
-              <p className="mx-auto mt-4 max-w-4xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-                11 hours driving, inside a 14-hour window. Past the line the load is illegal and the truck stops.
-              </p>
-              <p className="mx-auto mt-3 max-w-4xl text-base leading-relaxed text-muted-foreground md:text-lg">
-                Today that math lives in a dispatcher&rsquo;s head or on paper. The software that exists is old,
-                or connects one piece of the puzzle — and 97% of US carriers run fewer than 20 trucks, too small
-                to buy their way out of it.
-              </p>
-            </motion.div>
+              One dispatcher. <span className="text-primary">Forty trucks.</span>
+            </motion.h2>
 
-            <motion.div
-              initial={{ opacity: 0, y: 28 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.18 }}
-              viewport={{ once: false, amount: 0.25 }}
-            >
-              <LinesPatternCard className="max-w-5xl mx-auto rounded-[1.75rem] border-primary/30 shadow-[0_30px_90px_rgba(33,117,78,0.22)]">
-                <LinesPatternCardBody className="p-5 md:p-6">
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-5">
-                      <p className="text-lg font-semibold text-destructive mb-1">Today</p>
-                      <p className="text-3xl md:text-4xl font-black text-destructive">The ELD is the evidence</p>
-                      <p className="mt-3 text-base text-muted-foreground leading-relaxed">
-                        The ELD records the violation — and hands a plaintiff&rsquo;s attorney the exhibit.
-                      </p>
-                    </div>
-                    <div className="rounded-xl border border-primary/30 bg-primary/5 p-5">
-                      <p className="text-lg font-semibold text-primary mb-1">With Dispatch Guardian</p>
-                      <p className="text-3xl md:text-4xl font-black text-primary">The record is the defense</p>
-                      <p className="mt-3 text-base text-muted-foreground leading-relaxed">
-                        Refuses the plan that breaks the clock. Logs the legal one a named dispatcher approved.
-                      </p>
-                    </div>
+            <div className="grid gap-5 sm:grid-cols-3 max-w-4xl mx-auto">
+              {dispatchCounters.map((counter, index) => (
+                <motion.div
+                  key={counter.label}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  className="rounded-[1.5rem] border border-primary/25 bg-card/90 px-6 py-7 backdrop-blur-md"
+                >
+                  <div className="text-5xl md:text-6xl font-black tracking-tight text-primary">
+                    {counter.value}
                   </div>
-                </LinesPatternCardBody>
-              </LinesPatternCard>
-            </motion.div>
+                  <p className="mt-2 text-base md:text-lg text-muted-foreground">{counter.label}</p>
+                </motion.div>
+              ))}
+            </div>
 
-            <p className="text-center text-base md:text-lg text-muted-foreground max-w-4xl mx-auto">
-              One delay sends two bills — the violation if the driver keeps going, the late fee if he stops.
-              <span className="text-foreground"> Somebody has to price that trade-off in minutes.</span>
+            <div className="flex flex-wrap items-center justify-center gap-2 max-w-4xl mx-auto">
+              {dispatchChips.map((chip) => (
+                <span
+                  key={chip}
+                  className="rounded-full border border-border bg-card/70 px-3 py-1 text-xs md:text-sm text-muted-foreground"
+                >
+                  {chip}
+                </span>
+              ))}
+            </div>
+
+            <p className="mx-auto max-w-4xl text-base md:text-lg text-muted-foreground">
+              Any of them can change at any hour of the day.
+            </p>
+
+            <p className="mx-auto max-w-4xl text-lg md:text-xl text-foreground">
+              Held together in someone&rsquo;s head, on paper, or in outdated software —
+              <span className="text-destructive"> and every handoff is a chance for human error</span>.
             </p>
           </div>
         </Section>
 
-        <Section id="stakes" className="bg-transparent" contentClassName="max-w-[92rem] py-6">
-          <div className="space-y-6">
-            <motion.div
+        <Section id="industry" className="bg-transparent" contentClassName="max-w-6xl py-8">
+          <div className="space-y-7">
+            <motion.h2
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               viewport={{ once: false, amount: 0.35 }}
-              className="mx-auto max-w-6xl text-center"
+              className="mx-auto max-w-5xl text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
             >
-              <h2 className="text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl">
-                When the plan fails, <span className="text-destructive">the company pays.</span>
-              </h2>
-            </motion.div>
+              Enormous industry. <span className="text-destructive">Almost no margin.</span>
+            </motion.h2>
 
             <div className="grid max-w-6xl mx-auto gap-4 md:grid-cols-3">
-              {stakesCards.map((card, index) => (
+              {industryCards.map((card, index) => (
                 <motion.div
                   key={card.number}
                   initial={{ opacity: 0, y: 28 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.08 * index }}
                   viewport={{ once: false, amount: 0.3 }}
-                  className={`h-full rounded-[1.5rem] border bg-card/90 px-5 py-5 backdrop-blur-md ${card.borderClassName} ${card.shadowClassName}`}
+                  className={`h-full rounded-[1.5rem] border bg-card/90 px-6 py-6 backdrop-blur-md ${card.borderClassName} ${card.shadowClassName}`}
                 >
                   <div className={`text-4xl font-black tracking-tight md:text-5xl ${card.numberClassName}`}>
                     {card.number}
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
                     {card.text}
                   </p>
-                  <Citation text={card.citation} className="!mt-1.5" />
+                  <Citation text={card.citation} className="!mt-2" />
+                </motion.div>
+              ))}
+            </div>
+
+            <p className="text-center text-base md:text-lg text-muted-foreground max-w-4xl mx-auto">
+              Another <span className="text-foreground">$11.5B</span> goes to detention at the dock.
+              In an industry this thin, delay is the margin.
+            </p>
+          </div>
+        </Section>
+
+        <Section id="impact" className="bg-transparent" contentClassName="max-w-6xl py-8">
+          <div className="space-y-7">
+            <motion.h2
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: false, amount: 0.35 }}
+              className="mx-auto max-w-5xl text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
+            >
+              Then one of them <span className="text-destructive">runs late</span>.
+            </motion.h2>
+
+            <div className="grid gap-5 md:grid-cols-2 max-w-5xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: false, amount: 0.3 }}
+                className="rounded-[1.5rem] border border-destructive/30 bg-destructive/5 p-6"
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-destructive">Push through</p>
+                <p className="mt-2 text-2xl md:text-3xl font-black text-destructive">Over the legal limit</p>
+                <p className="mt-3 text-base text-muted-foreground leading-relaxed">
+                  A violation, CSA points, and a driver on the road who should not be.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.12 }}
+                viewport={{ once: false, amount: 0.3 }}
+                className="rounded-[1.5rem] border border-[#e4b24d]/30 bg-[#e4b24d]/5 p-6"
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#e4b24d]">Stop</p>
+                <p className="mt-2 text-2xl md:text-3xl font-black text-[#e4b24d]">Late delivery</p>
+                <p className="mt-3 text-base text-muted-foreground leading-relaxed">
+                  Late fees, a missed window, and a shipper who remembers next quarter.
+                </p>
+              </motion.div>
+            </div>
+
+            <p className="text-center text-base md:text-lg text-muted-foreground max-w-4xl mx-auto">
+              Detention alone burns <span className="text-foreground">117-209 hours</span> of a driver&rsquo;s
+              legal clock a year. And if it ends in a crash, the average claim is{' '}
+              <span className="text-foreground">$450,000</span>.
+            </p>
+          </div>
+        </Section>
+
+        <Section id="guardian" className="bg-transparent" contentClassName="max-w-6xl py-8">
+          <div className="space-y-8 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: false, amount: 0.35 }}
+            >
+              <h2 className="text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl">
+                Dispatch Guardian. <span className="text-primary">One view.</span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-3xl text-lg md:text-xl text-muted-foreground">
+                Every driver, truck, load, and clock in the same place.
+              </p>
+            </motion.div>
+
+            <div className="flex flex-wrap items-center justify-center gap-2.5 max-w-5xl mx-auto">
+              {dispatchChips.concat(['Hours worked', 'Legal limits']).map((chip, index) => (
+                <motion.span
+                  key={chip}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.35, delay: 0.04 * index }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  className="rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm md:text-base text-foreground"
+                >
+                  {chip}
+                </motion.span>
+              ))}
+            </div>
+
+            <p className="mx-auto max-w-4xl text-lg md:text-xl text-foreground">
+              It doesn&rsquo;t just help build the plan. It helps you{' '}
+              <span className="text-primary">respond when the plan breaks</span>.
+            </p>
+          </div>
+        </Section>
+
+        <Section id="engine" className="bg-transparent" contentClassName="max-w-6xl py-8">
+          <div className="space-y-7">
+            <motion.h2
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: false, amount: 0.35 }}
+              className="mx-auto max-w-5xl text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
+            >
+              Two layers. <span className="text-primary">One decision.</span>
+            </motion.h2>
+
+            <div className="grid gap-5 md:grid-cols-2 max-w-5xl mx-auto">
+              {engineLayers.map((layer, index) => (
+                <motion.div
+                  key={layer.title}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.12 * index }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  className={`rounded-[1.5rem] border p-6 text-left ${layer.bgClassName} ${layer.borderClassName}`}
+                >
+                  <p className={`text-2xl md:text-3xl font-semibold ${layer.accentClassName}`}>{layer.title}</p>
+                  <p className="mt-1 text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">
+                    {layer.subtitle}
+                  </p>
+                  <p className="mt-3 text-base leading-relaxed text-foreground">{layer.text}</p>
                 </motion.div>
               ))}
             </div>
 
             <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 max-w-5xl mx-auto text-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">What prevention is worth</p>
-              <p className="mt-2 text-base md:text-lg text-foreground leading-relaxed">
-                A 20-truck fleet pays about <span className="font-semibold">$8,000 a year</span> for Guardian.
-                One avoided fine ($7,092 average assessed) pays for the year.{' '}
-                <span className="font-semibold">One avoided claim pays for fifty.</span>
+              <p className="text-lg md:text-xl text-foreground">
+                The dispatcher still decides — in{' '}
+                <span className="font-semibold text-primary">one to five minutes</span>, not thirty.
+              </p>
+              <p className="mt-2 text-sm md:text-base text-muted-foreground">
+                The model runs on your box: private, and still running at 3am.
               </p>
             </div>
           </div>
         </Section>
 
-        <Section id="how-it-works" className="bg-transparent" contentClassName="max-w-7xl py-6">
+        <Section id="demo" className="bg-transparent" contentClassName="max-w-7xl py-6">
           <div className="space-y-5">
-            <div className="text-center space-y-3">
-              <h1 className="text-3xl font-bold text-foreground md:text-5xl xl:text-6xl">
-                It watches the clock, <span className="text-primary">not the driver</span>.
-              </h1>
-              <p className="max-w-4xl mx-auto text-lg md:text-xl text-muted-foreground">
-                No cameras. No driver scoring. Legal limits in code, trade-offs in the local model,{' '}
-                <span className="text-foreground">the decision with the dispatcher.</span>
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-2 pt-1 max-w-5xl mx-auto">
-                {ingestChips.map((chip) => (
-                  <span
-                    key={chip}
-                    className="rounded-full border border-primary/25 bg-primary/5 px-3 py-1 text-xs md:text-sm text-muted-foreground"
+            <h2 className="text-center text-4xl font-black tracking-tight text-foreground md:text-6xl">
+              Demo
+            </h2>
+
+            <div className="mx-auto max-w-6xl">
+              <ScreenshotSlot
+                label="Overlay view — the whole operation at once"
+                src="/demo-overlay.png"
+                className="h-[17rem] md:h-[21rem]"
+              />
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2 max-w-6xl mx-auto">
+              <ScreenshotSlot
+                label="Drivers"
+                src="/demo-drivers.png"
+                caption="Rosters, hours worked, legal limits"
+                className="h-[11rem] md:h-[13rem]"
+              />
+              <ScreenshotSlot
+                label="Loads"
+                src="/demo-loads.png"
+                caption="Active, upcoming, and their deadlines"
+                className="h-[11rem] md:h-[13rem]"
+              />
+            </div>
+          </div>
+        </Section>
+
+        <Section id="approval" className="bg-transparent" contentClassName="max-w-7xl py-6">
+          <div className="space-y-5">
+            <h2 className="text-center text-3xl font-black tracking-tight text-foreground md:text-5xl">
+              Incident, options, <span className="text-primary">approval</span>.
+            </h2>
+
+            <div className="grid gap-5 md:grid-cols-3 max-w-7xl mx-auto">
+              <ScreenshotSlot
+                label="Incident detail"
+                src="/demo-incident.png"
+                caption="What broke, and which clock"
+                className="h-[17rem] md:h-[21rem]"
+              />
+              <ScreenshotSlot
+                label="Incident options"
+                src="/demo-options.png"
+                caption="+$1,200 to stay on the original plan"
+                className="h-[17rem] md:h-[21rem]"
+              />
+              <ScreenshotSlot
+                label="Slack approval"
+                src="/demo-slack.png"
+                caption="Approved without leaving Slack"
+                className="h-[17rem] md:h-[21rem]"
+              />
+            </div>
+          </div>
+        </Section>
+
+        <Section id="compare" className="bg-transparent" contentClassName="max-w-6xl py-6">
+          <div className="space-y-4">
+            <motion.h2
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: false, amount: 0.35 }}
+              className="text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl"
+            >
+              Everyone solved <span className="text-primary">one piece</span>.
+            </motion.h2>
+
+            <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-border bg-card/80 backdrop-blur-md">
+              {/* header */}
+              <div className="grid grid-cols-[1.5fr_1fr_1fr_1.15fr] items-end gap-2 border-b border-border px-4 py-3">
+                <div />
+                {comparisonColumns.map((col, i) => (
+                  <div
+                    key={col}
+                    className={`text-center text-xs md:text-sm font-semibold leading-tight ${
+                      i === 2 ? 'text-primary' : 'text-muted-foreground'
+                    }`}
                   >
-                    {chip}
-                  </span>
+                    {col}
+                  </div>
                 ))}
               </div>
-            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-wrap items-center justify-center gap-2.5 max-w-6xl mx-auto"
-            >
-              {workflowSteps.map((step, index) => (
-                <div key={step.title} className="flex items-center gap-2.5">
-                  <LinesPatternCard className={`rounded-lg shadow-lg ${step.borderClassName}`}>
-                    <LinesPatternCardBody className="flex h-12 items-center justify-center px-3 py-2 text-center">
-                      <p className="text-lg font-semibold text-foreground whitespace-nowrap">{step.title}</p>
-                    </LinesPatternCardBody>
-                  </LinesPatternCard>
+              {/* capability checklist */}
+              {comparisonRows.map((row, rowIndex) => (
+                <motion.div
+                  key={row.capability}
+                  initial={{ opacity: 0, x: -12 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.35, delay: 0.05 * rowIndex }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  className="grid grid-cols-[1.5fr_1fr_1fr_1.15fr] items-center gap-2 border-b border-border/40 px-4 py-2"
+                >
+                  <div className="text-xs md:text-sm text-foreground">{row.capability}</div>
+                  {row.values.map((value, i) => (
+                    <div
+                      key={i}
+                      className={`flex items-center justify-center text-center ${
+                        i === 2 ? 'rounded-md bg-primary/10 py-1' : ''
+                      }`}
+                    >
+                      <ComparisonCell value={value} highlight={i === 2} />
+                    </div>
+                  ))}
+                </motion.div>
+              ))}
 
-                  {index < workflowSteps.length - 1 && (
-                    <div className={`text-xl font-bold ${step.arrowClassName}`}>→</div>
-                  )}
+              {/* metrics */}
+              {comparisonMetrics.map((metric, rowIndex) => (
+                <div
+                  key={metric.label}
+                  className={`grid grid-cols-[1.5fr_1fr_1fr_1.15fr] items-center gap-2 px-4 py-2 ${
+                    rowIndex === 0 ? 'border-t border-border bg-muted/20' : 'bg-muted/20'
+                  } ${rowIndex === comparisonMetrics.length - 1 ? '' : 'border-b border-border/40'}`}
+                >
+                  <div className="text-xs md:text-sm font-semibold text-muted-foreground">{metric.label}</div>
+                  {metric.values.map((value, i) => (
+                    <div
+                      key={i}
+                      className={`text-center text-[0.7rem] md:text-xs leading-tight ${
+                        i === 2 ? 'rounded-md bg-primary/10 py-1 font-semibold text-foreground' : 'text-muted-foreground'
+                      }`}
+                    >
+                      {value}
+                    </div>
+                  ))}
                 </div>
               ))}
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.15 }}
-            >
-              <LinesPatternCard className="rounded-xl shadow-2xl border-primary/40 max-w-7xl mx-auto">
-                <LinesPatternCardBody className="p-5">
-                  <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-5 text-center">What the dispatcher actually gets</h3>
-                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    {workflowArtifacts.map((artifact) => (
-                      <div
-                        key={artifact.title}
-                        className={`rounded-xl border p-4 text-left ${artifact.bgClassName} ${artifact.borderClassName}`}
-                      >
-                        <p className={`text-xl md:text-2xl font-semibold ${artifact.accentClassName}`}>{artifact.title}</p>
-                        <p className="mt-2 text-sm md:text-base leading-relaxed text-foreground">{artifact.text}</p>
-                        <Citation text={artifact.citation} className="!mt-1.5" />
-                      </div>
-                    ))}
-                  </div>
-                </LinesPatternCardBody>
-              </LinesPatternCard>
-            </motion.div>
-
-            <LinesPatternCard className="max-w-6xl mx-auto rounded-xl shadow-2xl border-primary/25">
-              <LinesPatternCardBody className="p-5 text-center">
-                <p className="text-lg font-semibold uppercase tracking-[0.12em] text-primary">The 90-minute delay</p>
-                <p className="mt-2 text-xl md:text-2xl font-medium text-foreground leading-snug">
-                  The route no longer finishes legally. Guardian prices the legal options — swap to the truck
-                  already waiting, or hold and take the late fee — and the dispatcher approves one in Slack.
-                </p>
-              </LinesPatternCardBody>
-            </LinesPatternCard>
+            <p className="mx-auto max-w-3xl text-center text-lg md:text-xl font-medium text-foreground">
+              All of them assume <span className="text-destructive">the plan holds</span>.
+            </p>
           </div>
         </Section>
-
-        <Section id="stack" className="bg-transparent" contentClassName="max-w-6xl py-8">
-          <div className="space-y-6">
-            <div className="text-center space-y-3">
-              <h1 className="text-3xl font-bold text-foreground md:text-5xl xl:text-6xl">
-                The whole stack runs on <span className="text-primary">one box</span>
-              </h1>
-              <p className="max-w-4xl mx-auto text-lg md:text-xl text-muted-foreground">
-                Dell Pro Max with NVIDIA GB10. Legal limits stay in deterministic Python —{' '}
-                <span className="text-foreground">the model never does legal arithmetic.</span>
-              </p>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-3 max-w-6xl mx-auto text-left">
-              {stackCards.map((card) => (
-                <motion.div
-                  key={card.title}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  viewport={{ once: false, amount: 0.3 }}
-                  className={`rounded-xl border p-6 ${card.bgClassName} ${card.borderClassName}`}
-                >
-                  <p className={`text-xl md:text-2xl font-semibold ${card.accentClassName}`}>{card.title}</p>
-                  <p className="mt-3 text-sm md:text-base leading-relaxed text-foreground">{card.text}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="rounded-xl border border-primary/25 bg-card/90 p-6 max-w-4xl mx-auto text-center">
-              <p className="text-lg md:text-xl text-foreground leading-relaxed">
-                No rates or safety records handed to a cloud vendor. No per-token bill. One box answers both.
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        <Section id="eld" className="bg-transparent" contentClassName="max-w-6xl py-8">
-          <div className="space-y-6">
-            <div className="text-center space-y-3">
-              <h1 className="text-3xl font-bold text-foreground md:text-5xl xl:text-6xl">
-                The ELD <span className="text-destructive">records</span>. It doesn&rsquo;t decide.
-              </h1>
-              <p className="max-w-4xl mx-auto text-lg md:text-xl text-muted-foreground">
-                Every truck has had one since the mandate — and hours-of-service is still the #2 driver
-                out-of-service violation at roadside.
-              </p>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-3 max-w-6xl mx-auto text-left">
-              {eldCards.map((card, index) => (
-                <motion.div
-                  key={card.title}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 * index }}
-                  viewport={{ once: false, amount: 0.3 }}
-                  className={`h-full rounded-xl border p-6 ${card.bgClassName} ${card.borderClassName}`}
-                >
-                  <p className={`text-xl md:text-2xl font-semibold ${card.accentClassName}`}>{card.title}</p>
-                  <p className="mt-3 text-sm md:text-base leading-relaxed text-foreground">{card.text}</p>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="rounded-xl border border-primary/30 bg-primary/5 p-6 max-w-5xl mx-auto text-center">
-              <p className="text-lg md:text-xl text-foreground leading-relaxed">
-                Recording a violation was never the same as preventing one.{' '}
-                <span className="font-semibold text-primary">Guardian keeps the balance — the reasoning runs
-                on your box, the data never leaves, and the output is a decision.</span>
-              </p>
-              <p className="mt-3 text-sm md:text-base text-muted-foreground border-t border-border/50 pt-3">
-                Nobody pairs always-on monitoring with costed recovery and local inference.
-              </p>
-            </div>
-          </div>
-        </Section>
-
-
-
 
         <Section id="conclusion" className="bg-transparent" contentClassName="max-w-5xl py-16">
           <div className="space-y-10 text-center">
@@ -633,7 +753,6 @@ const Index = () => {
                 <span className="text-primary">A human in the loop.</span>
               </p>
             </motion.div>
-
           </div>
         </Section>
       </div>
