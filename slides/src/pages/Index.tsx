@@ -158,9 +158,9 @@ const MAIN_NAV_ITEMS = [
   { label: 'Industry', id: 'industry' },
   { label: 'Impact', id: 'impact' },
   { label: 'Guardian', id: 'guardian' },
-  { label: 'Engine', id: 'engine' },
   { label: 'Demo', id: 'demo' },
   { label: 'Slack', id: 'approval' },
+  { label: 'Engine', id: 'engine' },
   { label: 'Compare', id: 'compare' },
   { label: 'Close', id: 'conclusion' },
 ];
@@ -518,59 +518,6 @@ const Index = () => {
           </div>
         </Section>
 
-        <Section id="engine" className="bg-transparent" contentClassName="max-w-6xl py-8">
-          <div className="space-y-7">
-            <motion.h2
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-              viewport={{ once: false, amount: 0.35 }}
-              className="mx-auto max-w-5xl text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
-            >
-              Three layers. <span className="text-primary">One decision.</span>
-            </motion.h2>
-
-            <div className="flex flex-col gap-3 max-w-5xl mx-auto">
-              {engineLayers.map((layer, index) => (
-                <motion.div
-                  key={layer.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.45, delay: 0.1 * index }}
-                  viewport={{ once: false, amount: 0.25 }}
-                  className={`flex items-start gap-4 rounded-xl border p-4 md:p-5 text-left ${layer.bgClassName} ${layer.borderClassName}`}
-                >
-                  <span className={`font-mono text-sm font-bold ${layer.accentClassName}`}>{layer.index}</span>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
-                      <p className={`text-xl md:text-2xl font-semibold ${layer.accentClassName}`}>{layer.title}</p>
-                      {layer.tech.map((tag) => (
-                        <span
-                          key={tag}
-                          className="rounded border border-border bg-background/40 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="mt-2 text-sm md:text-base leading-relaxed text-muted-foreground">{layer.text}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-
-            <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 max-w-5xl mx-auto text-center">
-              <p className="text-lg md:text-xl text-foreground">
-                The dispatcher still decides — in{' '}
-                <span className="font-semibold text-primary">one to five minutes</span>, not thirty.
-              </p>
-              <p className="mt-2 text-sm md:text-base text-muted-foreground">
-                The model runs on your box: private, and still running at 3am.
-              </p>
-            </div>
-          </div>
-        </Section>
-
         <Section id="demo" className="bg-transparent" contentClassName="max-w-7xl py-5">
           <div className="space-y-4">
             <h2 className="text-center text-4xl font-black tracking-tight text-foreground md:text-6xl">
@@ -637,6 +584,59 @@ const Index = () => {
                 caption="Approved from a phone"
                 className="mx-auto h-[20rem] lg:h-[26rem] aspect-[1320/2868]"
               />
+            </div>
+          </div>
+        </Section>
+
+        <Section id="engine" className="bg-transparent" contentClassName="max-w-6xl py-8">
+          <div className="space-y-7">
+            <motion.h2
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              viewport={{ once: false, amount: 0.35 }}
+              className="mx-auto max-w-5xl text-center text-3xl font-black tracking-tight leading-[1.05] text-foreground md:text-5xl xl:text-6xl"
+            >
+              Three layers. <span className="text-primary">One decision.</span>
+            </motion.h2>
+
+            <div className="flex flex-col gap-3 max-w-5xl mx-auto">
+              {engineLayers.map((layer, index) => (
+                <motion.div
+                  key={layer.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, delay: 0.1 * index }}
+                  viewport={{ once: false, amount: 0.25 }}
+                  className={`flex items-start gap-4 rounded-xl border p-4 md:p-5 text-left ${layer.bgClassName} ${layer.borderClassName}`}
+                >
+                  <span className={`font-mono text-sm font-bold ${layer.accentClassName}`}>{layer.index}</span>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1.5">
+                      <p className={`text-xl md:text-2xl font-semibold ${layer.accentClassName}`}>{layer.title}</p>
+                      {layer.tech.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded border border-border bg-background/40 px-2 py-0.5 font-mono text-[0.65rem] text-muted-foreground"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-sm md:text-base leading-relaxed text-muted-foreground">{layer.text}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 max-w-5xl mx-auto text-center">
+              <p className="text-lg md:text-xl text-foreground">
+                The dispatcher still decides — in{' '}
+                <span className="font-semibold text-primary">one to five minutes</span>, not thirty.
+              </p>
+              <p className="mt-2 text-sm md:text-base text-muted-foreground">
+                The model runs on your box: private, and still running at 3am.
+              </p>
             </div>
           </div>
         </Section>
