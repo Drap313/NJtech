@@ -110,3 +110,46 @@ svg text{font-family:system-ui,sans-serif}
   .side.open{transform:none}.iconbtn{display:block}.g2{grid-template-columns:1fr}.mini{grid-template-columns:repeat(2,minmax(0,1fr))}
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}#view{padding:14px}.top{padding:10px 14px}
 }
+
+/* ---- chat dock (available on every page) ---- */
+.chat-fab{position:fixed;right:20px;bottom:20px;z-index:1500;background:#1f6f2b;color:#fff;border:1px solid #2e8b3e;border-radius:999px;padding:10px 16px;font:600 13px system-ui;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.chat-fab:hover{background:#238636}
+.dock{position:fixed;right:20px;bottom:20px;z-index:1600;width:440px;max-width:calc(100vw - 24px);height:min(640px,calc(100vh - 90px));background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 50px rgba(0,0,0,.45);display:none;flex-direction:column}
+.dock.open{display:flex}
+.dock-hd{display:flex;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}.dock-hd .iconbtn{margin-left:auto;display:block}
+.dock-tabs{display:flex;gap:4px;padding:6px 10px 0;border-bottom:1px solid var(--line)}
+.dock-tabs a{padding:6px 10px;color:var(--muted);border-bottom:2px solid transparent}.dock-tabs a.on{color:var(--text);border-color:var(--accent)}.dock-tabs a:hover{text-decoration:none}
+.dock-bd{padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;min-height:0;overflow:auto}
+.dock .chatlog{flex:1;min-height:0;max-height:none}
+/* ---- leaflet maps inside pages ---- */
+.lslot{width:100%;border-radius:8px;overflow:hidden;position:relative}
+.lslot>.lmap{width:100%;height:100%}
+.leaflet-container{background:var(--bg);font:12px system-ui}
+.truck{background:transparent;border:0}
+.truck span{display:inline-block;transform:translate(-50%,-50%);padding:2px 7px;border-radius:999px;color:#fff;font:700 11px/1.4 var(--mono);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.45);white-space:nowrap;cursor:pointer}
+.truck.faded span{opacity:.3}.truck.idle span{background:#1b2330!important;color:#a5b4c3;border-color:#5f6b7a;font-weight:600}
+.place{font:600 11px system-ui;color:#1b2330;background:rgba(255,255,255,.9);border:0;box-shadow:none;padding:1px 5px;border-radius:4px}.place::before{display:none}
+.maplegend{position:absolute;left:10px;bottom:10px;z-index:500;background:rgba(18,24,33,.92);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:11.5px;color:var(--muted)}
+.maplegend .seg2{display:flex;gap:4px;margin-bottom:6px}.maplegend .seg2 button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:6px;padding:2px 7px;font-size:11.5px;cursor:pointer}
+.maplegend .seg2 button.on{background:var(--panel2);color:var(--text)}
+.maplegend i{display:inline-block;width:16px;height:4px;border-radius:2px;margin:0 6px 2px 0;vertical-align:middle}
+.board svg{min-width:900px}
+/* ---- light theme ---- */
+:root[data-theme="light"]{--bg:#f5f6f8;--panel:#ffffff;--panel2:#f2f4f7;--line:#e2e6ec;--line2:#eef0f3;--text:#14171c;--muted:#566070;--dim:#8a93a1}
+:root[data-theme="light"] body{background:var(--bg)}
+:root[data-theme="light"] .side{background:#fff}
+:root[data-theme="light"] .top{background:rgba(245,246,248,.94)}
+:root[data-theme="light"] tr.click:hover td,:root[data-theme="light"] .inc-row:hover{background:#f6f8fb}
+:root[data-theme="light"] .PASS,:root[data-theme="light"] .ON_TIME,:root[data-theme="light"] .normal,:root[data-theme="light"] .DISPATCHED,:root[data-theme="light"] .available{background:#e8f5ec;color:#1a7f37}
+:root[data-theme="light"] .FAIL,:root[data-theme="light"] .LATE,:root[data-theme="light"] .critical,:root[data-theme="light"] .CRITICAL,:root[data-theme="light"] .BLOCKED{background:#fdecec;color:#c62828}
+:root[data-theme="light"] .UNKNOWN,:root[data-theme="light"] .MANUAL_REVIEW,:root[data-theme="light"] .AT_RISK,:root[data-theme="light"] .elevated,:root[data-theme="light"] .MEDIUM,:root[data-theme="light"] .DECLINED,:root[data-theme="light"] .OPEN{background:#fff4e0;color:#b25e00}
+:root[data-theme="light"] .high,:root[data-theme="light"] .HIGH{background:#ffeedd;color:#c2410c}
+:root[data-theme="light"] .LOW,:root[data-theme="light"] .PROPOSED,:root[data-theme="light"] .assigned,:root[data-theme="light"] .estimate,:root[data-theme="light"] .policy{background:#eef1f5;color:#566070}
+:root[data-theme="light"] .EXECUTED,:root[data-theme="light"] .RESOLVED,:root[data-theme="light"] .COMPLETED{background:#e7f0fb;color:#1f4f8f}
+:root[data-theme="light"] .contract{background:#f1eafe;color:#6d28d9}
+:root[data-theme="light"] .callout{background:#fdf2f2}:root[data-theme="light"] .callout.ok{background:#eef8f1}:root[data-theme="light"] .callout.info{background:#eef4fd}
+:root[data-theme="light"] .msg.user{background:#eef4ff}:root[data-theme="light"] .compare td.best{background:#eef8f1}
+:root[data-theme="light"] .maplegend{background:rgba(255,255,255,.95)}
+:root[data-theme="light"] .truck.idle span{background:#fff!important;color:#566070;border-color:#9aa3af}
+:root[data-theme="light"] nav a.on{box-shadow:inset 2px 0 0 var(--accent)}
+.iconbtn.theme{display:block}

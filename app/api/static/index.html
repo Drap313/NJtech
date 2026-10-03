@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Dispatch Guardian</title>
+<link rel="stylesheet" href="/static/vendor/leaflet/leaflet.css">
 <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
@@ -28,12 +29,31 @@
       </div>
       <button class="btn" id="adv" title="Advance the sim clock">+15m</button>
       <label class="who">Dispatcher <input id="actor" value="dispatcher"></label>
+      <button class="iconbtn theme" id="theme" title="Light / dark">◐</button>
     </header>
     <div id="banner"></div>
     <main id="view"></main>
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<button class="chat-fab" id="chat-fab">💬 Ask Dispatch Guardian</button>
+<section class="dock" id="dock" aria-hidden="true">
+  <div class="dock-hd"><b>Dispatch Guardian assistant</b><span class="muted small" id="chat-model">local · read-only tools</span><button class="iconbtn" id="dock-close" aria-label="Close">✕</button></div>
+  <div class="dock-tabs"><a href="javascript:void 0" data-docktab="chat" class="on">Chat</a><a href="javascript:void 0" data-docktab="intake">Report an update</a></div>
+  <div class="dock-bd" id="dock-chat">
+    <div class="chatlog" id="chatlog"></div>
+    <div class="chips" id="chips"></div>
+    <div class="row"><input id="chat-in" class="grow" placeholder="Ask about loads, drivers, incidents or options…"><button class="btn primary" id="chat-go">Ask</button></div>
+  </div>
+  <div class="dock-bd" id="dock-intake" hidden>
+    <div class="muted small">Paste a shipper call note, driver text or customer email, or upload a photo of a document. The local model turns it into a structured event; you decide whether to submit it.</div>
+    <textarea id="intake-text" placeholder="e.g. Buckeye just called, Marcus's reefer won't be loaded for another hour and 15"></textarea>
+    <div class="row"><button class="btn" id="intake-go">Read text</button><input type="file" id="doc-file" accept="image/*" class="grow"><button class="btn" id="doc-go">Read photo</button></div>
+    <div class="small"><a href="/static/samples/delay_notice_dg204.png" target="_blank">Sample fax</a></div>
+    <div id="intake-out"></div>
+  </div>
+</section>
+<script src="/static/vendor/leaflet/leaflet.js"></script>
 <script src="/static/app.js"></script>
 </body>
 </html>

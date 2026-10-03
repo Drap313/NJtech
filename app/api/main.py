@@ -1,6 +1,7 @@
 """HTTP API + dashboard. Run: uvicorn app.api.main:app --host 0.0.0.0 --port 8090"""
 from __future__ import annotations
 
+import ipaddress
 import os
 import secrets
 import threading
@@ -75,6 +76,9 @@ async def lifespan(app: FastAPI):
         ctx.reset()
     if os.environ.get("DG_RUNTIME", "1") != "0":
         ctx.runtime.start()
+    from ..integrations.openclaw_notify import OpenClawNotifier
+    ctx.openclaw = OpenClawNotifier(ctx)
+    ctx.openclaw.start()
     from ..integrations.slack_bridge import SlackBridge
     ctx.slack = SlackBridge(ctx)
     ctx.slack.start()
@@ -87,6 +91,16 @@ app = FastAPI(title="Dispatch Guardian", version="0.1.0", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 LOOPBACK = {"127.0.0.1", "::1", "localhost"}
+# Devices on the local Wi-Fi may open the dashboard without a token (demo convenience).
+TRUSTED_NETS = [ipaddress.ip_network(n.strip()) for n in os.environ.get("DG_TRUSTED_NETS", "172.20.64.0/20").split(",") if n.strip()]
+
+
+def _trusted_lan(host: str) -> bool:
+    try:
+        ip = ipaddress.ip_address(host)
+    except ValueError:
+        return False
+    return any(ip in n for n in TRUSTED_NETS)
 
 
 @app.middleware("http")
@@ -95,7 +109,7 @@ async def require_token_off_box(request, call_next):
     e.g. the OpenClaw sandbox, must present DG_API_TOKEN as a bearer token."""
     from fastapi.responses import JSONResponse
     client = request.client.host if request.client else ""
-    if client not in LOOPBACK:
+    if client not in LOOPBACK and not _trusted_lan(client):
         token = os.environ.get("DG_API_TOKEN", "")
         sent = request.headers.get("authorization", "").removeprefix("Bearer ").strip()
         if not token or not secrets.compare_digest(sent, token):
@@ -187,9 +201,63 @@ def state():
 @app.get("/api/map")
 def map_data():
     net = Fleet.load(C().store).net
-    return {"locations": [l.model_dump() for l in net.locations.values()],
-            "routes": {rid: [{"loc": w.loc, "lat": net.loc(w.loc).lat, "lon": net.loc(w.loc).lon, "minutes": w.minutes} for w in r.waypoints]
-                       for rid, r in net.routes.items()}}
+    geo = _route_geometry()
+    routes = {}
+    for rid, r in net.routes.items():
+        legs = geo.get("routes", {}).get(rid) or []
+        routes[rid] = {
+            "waypoints": [{"loc": w.loc, "name": net.loc(w.loc).name, "lat": net.loc(w.loc).lat, "lon": net.loc(w.loc).lon,
+                           "minutes": w.minutes} for w in r.waypoints],
+            # Real road polylines per leg (OSRM/OpenStreetMap, stored offline); straight segments if missing.
+            "legs": [{"from_min": a.minutes, "to_min": b.minutes,
+                      "points": (legs[i]["points"] if i < len(legs) else [[net.loc(a.loc).lat, net.loc(a.loc).lon], [net.loc(b.loc).lat, net.loc(b.loc).lon]])}
+                     for i, (a, b) in enumerate(zip(r.waypoints, r.waypoints[1:]))],
+        }
+    return {"locations": [l.model_dump() for l in net.locations.values()], "routes": routes, "pairs": geo.get("pairs", {})}
+
+
+_GEO: dict | None = None
+
+
+def _route_geometry() -> dict:
+    global _GEO
+    if _GEO is None:
+        import json
+        p = SYNTHETIC_DIR / "route_geometry.json"
+        _GEO = json.loads(p.read_text()) if p.exists() else {}
+    return _GEO
+
+
+@app.get("/api/schedule")
+def schedule():
+    """Dispatch board: every driver's projected day, from the latest stored evaluations."""
+    c = C()
+    now = c.clock.now()
+    fleet = Fleet.load(c.store)
+    rows: dict[str, dict] = {}
+    windows = []
+    for a in sorted(fleet.assignments.values(), key=lambda a: a.id):
+        if a.status not in ("DISPATCHED", "COMPLETED"):
+            continue
+        ev = c.store.get_evaluation(a.id)
+        if not ev:
+            continue
+        load = fleet.loads[a.load_id]
+        windows.append({"assignment_id": a.id, "load_id": a.load_id, "start": load.delivery_window.start.isoformat(),
+                        "end": load.delivery_window.end.isoformat(), "destination": fleet.net.loc(load.destination_id).name})
+        for e in ev.get("timeline", []):
+            if e["stop"] == "status":
+                continue
+            r = rows.setdefault(e["driver_id"], {"driver_id": e["driver_id"], "blocks": [], "loads": []})
+            r["blocks"].append({**e, "assignment_id": a.id, "load_id": a.load_id, "verdict": ev["verdict"]})
+            if a.load_id not in r["loads"]:
+                r["loads"].append(a.load_id)
+    out = []
+    for d in sorted(fleet.drivers.values(), key=lambda d: d.id):
+        row = rows.get(d.id, {"driver_id": d.id, "blocks": [], "loads": []})
+        row.update(_driver_row(d, fleet, now))
+        out.append(row)
+    return {"now": now.isoformat(), "drivers": out, "windows": windows}
 
 
 @app.get("/api/fleet")
@@ -535,6 +603,9 @@ def chat_brief():
         lines.append(f"- {i['id']} {i['severity']}: {i['title']} Cause: {i['cause']}.")
         if i.get("plans"):
             lines.append(f"  Recommended {_plan_line(i['plans'][0])}")
+    decide = [i for i in open_ if i.get("plans")]
+    if decide:
+        lines += ["", f"For buttons, run: dg.sh incident {decide[0]['id']}"]
     return "\n".join(lines)
 
 
@@ -548,7 +619,21 @@ def chat_incident(incident_id: str):
     lines += [f"- {_plan_line(p)}" for p in i.get("plans", [])]
     if i.get("rejected"):
         lines.append("Excluded by hard rules: " + "; ".join(f"{r['title']} ({', '.join(r['codes'])})" for r in i["rejected"][:6]))
+    if i["status"] == "OPEN" and i.get("plans"):
+        lines += ["", "Copy the next line exactly, on its own line at the end of your reply (it becomes Slack buttons):", _slack_buttons(i)]
     return "\n".join(lines)
+
+
+def _slack_buttons(i: dict) -> str:
+    """OpenClaw interactive-reply directive with one button per ranked plan plus reject."""
+    def label(p, n):
+        verb = {"RELAY": "Relay", "SWAP_DRIVER": "Swap", "HOLD_FOR_RESET": "Hold", "SWAP_TRACTOR": "Repower",
+                "CONTINUE": "Keep plan", "HOLD_AND_REAPPOINT": "Reappoint"}.get(p["kind"], "Option")
+        who = next((d["driver_id"] for d in p.get("drivers", []) if d["role"] in ("relay", "replacement")), "")
+        return f"{'✅ ' if n == 0 else ''}Approve {verb}{' ' + who if who else ''} (${p['incremental_cost']:,.0f})".replace(",", "")
+    btns = [f"{label(p, n)}:approve {p['plan_id']}" for n, p in enumerate(i["plans"][:3])]
+    btns.append(f"❌ Reject all:reject {i['id']}")
+    return "[[slack_buttons: " + ", ".join(btns) + "]]"
 
 
 @app.get("/api/chat/feed", response_class=PlainTextResponse)
@@ -583,8 +668,16 @@ def chat_approve(plan_id: str, body: ChatApprove):
             f"{rv['appointment_slack_minutes']} min slack.\n" + "\n".join("- " + x for x in res["changes"]))
 
 
+@app.get("/api/integrations/openclaw")
+def openclaw_status():
+    n = getattr(C(), "openclaw", None)
+    return n.status if n else {"enabled": False}
+
+
 @app.get("/api/health")
 def health():
     c = C()
     return {"api": "ok", **c.health(), "slack": getattr(c, "slack", None) and c.slack.status, "runtime": {"ticks": c.runtime.ticks, "last_error": c.runtime.last_error},
             "clock": c.clock.status(), "policy_versions": policy_versions()}
+
+from .slack_routes import router as slack_router; app.include_router(slack_router)  # noqa: E402,E702

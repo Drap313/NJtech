@@ -43,15 +43,14 @@ const ICON = {
   incidents: I('<path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/>'),
   loads: I('<rect x="2" y="7" width="13" height="10" rx="1"/><path d="M15 10h4l3 3v4h-7"/><circle cx="6" cy="18" r="1.6"/><circle cx="18" cy="18" r="1.6"/>'),
   drivers: I('<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>'),
-  map: I('<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>'),
+  schedule: I('<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M7 14h5M7 17h8"/>'),
   assistant: I('<path d="M4 5h16v11H8l-4 4z"/><path d="M8 10h8M8 13h5"/>'),
   activity: I('<path d="M3 12h4l3-8 4 16 3-8h4"/>'),
   policies: I('<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/>'),
 };
 const NAV = [
   {sec:"Operate"}, {id:"overview", label:"Overview"}, {id:"incidents", label:"Incidents"}, {id:"loads", label:"Loads"},
-  {id:"drivers", label:"Drivers"}, {id:"map", label:"Live map"},
-  {sec:"Assist"}, {id:"assistant", label:"Assistant"},
+  {id:"drivers", label:"Drivers"}, {id:"schedule", label:"Schedule"},
   {sec:"Govern"}, {id:"activity", label:"Activity & audit"}, {id:"policies", label:"Policies & models"},
 ];
 function route() {
@@ -65,37 +64,188 @@ function renderNav(r) {
 }
 
 /* ---------------------------------------------------------------- shared widgets */
-const BOUNDS = {w:-83.6, e:-73.4, s:39.05, n:41.05};
-function mapSVG(height=340, focus=null) {
-  if (!MAP || !S) return `<div class="empty">Loading map…</div>`;
-  const W = 1000, k = Math.cos(40.3*Math.PI/180), sc = Math.min((W-40)/((BOUNDS.e-BOUNDS.w)*k), (height-40)/(BOUNDS.n-BOUNDS.s));
-  const P = (lat, lon) => [20 + (Math.max(BOUNDS.w, Math.min(BOUNDS.e, lon))-BOUNDS.w)*k*sc, 20 + (BOUNDS.n-Math.max(BOUNDS.s, Math.min(BOUNDS.n, lat)))*sc, lon < BOUNDS.w];
-  const byDriver = {}; S.assignments.forEach(a => { if (a.status==="DISPATCHED") { if (a.driver_id) byDriver[a.driver_id]=a; if (a.relay) byDriver[a.relay.driver_id]=a; } });
-  const byRoute = {}; S.assignments.forEach(a => { if (a.status==="DISPATCHED" || !byRoute[a.route_id]) byRoute[a.route_id]=a; });
-  let h = "";
-  for (const [rid, pts] of Object.entries(MAP.routes)) {
-    const a = byRoute[rid], live = a && a.status === "DISPATCHED";
-    const col = !live ? "#253040" : a.verdict==="FAIL" ? "#f85149" : a.verdict==="UNKNOWN" ? "#d29922" : "#2f81f7";
-    const hl = focus && a && (a.id===focus || a.driver_id===focus);
-    h += `<polyline points="${pts.map(p=>P(p.lat,p.lon).slice(0,2).join(",")).join(" ")}" fill="none" stroke="${col}" stroke-width="${hl?4:live?2.4:1.2}" stroke-opacity="${live?.8:.6}" ${live?"":'stroke-dasharray="4 4"'}/>`;
-  }
-  for (const l of MAP.locations) {
-    const [x,y,off] = P(l.lat,l.lon);
-    const shape = l.kind==="terminal" ? `<rect x="${x-5}" y="${y-5}" width="10" height="10" fill="#76b900"/>` :
-      l.relay ? `<path d="M${x} ${y-6} L${x+6} ${y} L${x} ${y+6} L${x-6} ${y} Z" fill="#a371f7"/>` : `<circle cx="${x}" cy="${y}" r="3.2" fill="#8b98a8"/>`;
-    h += `${shape}<text x="${x+8}" y="${y-7}" fill="#7d8a9a" font-size="10.5">${esc(short(l.name))}${off?" ◀":""}</text>`;
-  }
-  for (const d of S.drivers) {
-    const [x,y] = P(d.lat, d.lon), a = byDriver[d.id];
-    const col = d.stale ? "#d29922" : !a ? "#5f6b7a" : a.verdict==="FAIL" ? "#f85149" : a.verdict==="PASS" ? "#3fb950" : "#d29922";
-    const big = d.duty_status==="DRIVING" || focus===d.id;
-    h += `<a href="#/drivers/${d.id}"><g><title>${esc(d.id)} ${esc(d.name)} · ${esc(d.duty_status)} · ${esc(d.location)}</title>
-      <circle cx="${x}" cy="${y}" r="${big?9:7}" fill="${col}" fill-opacity=".22" stroke="${col}" stroke-width="${focus===d.id?3:2}"/>
-      <text x="${x}" y="${y+19}" text-anchor="middle" fill="${col}" font-size="11" font-weight="700" font-family="ui-monospace,monospace">${d.id}</text></g></a>`;
-  }
-  return `<svg class="map" viewBox="0 0 ${W} ${height}" preserveAspectRatio="xMidYMid meet" style="height:${height}px">${h}</svg>`;
+/* ---- live map (Leaflet, real road geometry) --------------------------------------- */
+const COLORS = {ok:"#2ea043", warn:"#d29922", bad:"#f85149", idle:"#8b98a8", done:"#58a6ff"};
+let SEL = null, COLOR_BY = "status";
+function asgStatus(a) {
+  if (!a) return "idle";
+  if (a.status === "COMPLETED") return "done";
+  if (a.status !== "DISPATCHED") return "idle";
+  if (a.verdict === "FAIL" || a.tier === "LATE") return "bad";
+  if (a.verdict === "UNKNOWN" || a.verdict === "MANUAL_REVIEW" || a.tier === "AT_RISK") return "warn";
+  return "ok";
 }
-const MAP_LEGEND = `<div class="legend"><span><i style="background:#76b900"></i>terminal</span><span><i style="background:#a371f7"></i>relay lot</span><span><i style="background:#3fb950"></i>driver on a legal plan</span><span><i style="background:#f85149"></i>failing plan</span><span><i style="background:#d29922"></i>stale / unknown</span><span><i style="background:#5f6b7a"></i>idle</span></div>`;
+function hosStatus(a) {
+  if (!a || a.status !== "DISPATCHED") return "idle";
+  if (a.reserve == null) return a.verdict === "UNKNOWN" ? "warn" : "idle";
+  return a.reserve < 30 ? "bad" : a.reserve < 90 ? "warn" : "ok";
+}
+const colorOf = a => COLORS[COLOR_BY === "hos" ? hosStatus(a) : asgStatus(a)];
+const routeLegs = rid => (MAP && MAP.routes[rid] && MAP.routes[rid].legs) || [];
+function legPoint(pts, f) {
+  if (pts.length < 2) return {pt: pts[0], idx: 1};
+  const d = [0]; for (let i = 1; i < pts.length; i++) d.push(d[i-1] + Math.hypot(pts[i][0]-pts[i-1][0], (pts[i][1]-pts[i-1][1])*0.76));
+  const target = f * d[d.length-1];
+  for (let i = 1; i < pts.length; i++) if (d[i] >= target) {
+    const t = (target - d[i-1]) / Math.max(1e-9, d[i]-d[i-1]);
+    return {pt: [pts[i-1][0] + t*(pts[i][0]-pts[i-1][0]), pts[i-1][1] + t*(pts[i][1]-pts[i-1][1])], idx: i};
+  }
+  return {pt: pts[pts.length-1], idx: pts.length-1};
+}
+function splitRoute(rid, minutes) {
+  const done = [], rest = []; let pos = null;
+  for (const leg of routeLegs(rid)) {
+    if (minutes >= leg.to_min) { done.push(leg.points); pos = leg.points[leg.points.length-1]; continue; }
+    if (minutes <= leg.from_min) { rest.push(leg.points); continue; }
+    const r = legPoint(leg.points, (minutes - leg.from_min) / (leg.to_min - leg.from_min));
+    pos = r.pt; done.push([...leg.points.slice(0, r.idx), r.pt]); rest.push([r.pt, ...leg.points.slice(r.idx)]);
+  }
+  return {done, rest, pos};
+}
+function truckPos(a) {
+  const wps = MAP && MAP.routes[a.route_id] ? MAP.routes[a.route_id].waypoints : null;
+  if (!wps) return null;
+  if (a.stage === "IN_TRANSIT") return splitRoute(a.route_id, a.route_done).pos || [wps[0].lat, wps[0].lon];
+  if (a.stage === "AT_DELIVERY" || a.stage === "DELIVERED") { const w = wps[wps.length-1]; return [w.lat, w.lon]; }
+  return [wps[0].lat, wps[0].lon];
+}
+function repositionPath(d, pointId) {
+  const loc = id => MAP.locations.find(l => l.id === id), end = loc(pointId); if (!end) return null;
+  for (const [key, pts] of Object.entries(MAP.pairs || {})) {
+    const [a, b] = key.split("|"); if (a !== pointId && b !== pointId) continue;
+    const start = loc(a === pointId ? b : a), line = a === pointId ? pts.slice().reverse() : pts;
+    const dist = (p, q) => Math.hypot(p[0]-q[0], (p[1]-q[1])*0.76);
+    const total = dist([start.lat, start.lon], [end.lat, end.lon]), fs = dist([start.lat, start.lon], [d.lat, d.lon]), te = dist([d.lat, d.lon], [end.lat, end.lon]);
+    if (fs + te > total * 1.25) continue;
+    const r = legPoint(line, Math.max(0, Math.min(1, fs / Math.max(1e-9, fs + te))));
+    return {pos: r.pt, points: [r.pt, ...line.slice(r.idx)]};
+  }
+  return null;
+}
+const isLight = () => document.documentElement.dataset.theme === "light";
+class FleetMap {
+  constructor(el, opts = {}) {
+    this.opts = opts; this.el = el;
+    this.map = L.map(el, {zoomControl: true}).setView([40.4, -77.5], 7);
+    this.setTiles();
+    this.routes = L.layerGroup().addTo(this.map); this.places = L.layerGroup().addTo(this.map); this.trucks = L.layerGroup().addTo(this.map);
+    this.fitted = null;
+    this.map.on("click", () => { if (!opts.only && SEL) { SEL = null; draw(true); } });
+  }
+  setTiles() {
+    // Keyless basemaps: Esri gray canvas (+labels); OpenStreetMap if Esri tiles fail.
+    if (this.tiles) this.tiles.forEach(t => this.map.removeLayer(t));
+    const shade = isLight() ? "Light" : "Dark", esri = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/";
+    const base = L.tileLayer(`${esri}World_${shade}_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {maxZoom: 16, attribution: "Tiles &copy; Esri, HERE, Garmin, &copy; OpenStreetMap"});
+    const ref = L.tileLayer(`${esri}World_${shade}_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, {maxZoom: 16, opacity: 0.9});
+    let fell = false;
+    base.on("tileerror", () => { if (fell) return; fell = true; this.map.removeLayer(base); this.tiles.push(L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {maxZoom: 18, attribution: "&copy; OpenStreetMap"}).addTo(this.map).bringToBack()); });
+    this.tiles = [base.addTo(this.map), ref.addTo(this.map)];
+    this.shade = shade;
+  }
+  draw() {
+    if (!S || !MAP) return;
+    if (this.shade !== (isLight() ? "Light" : "Dark")) this.setTiles();
+    const only = this.opts.only, focus = only || SEL;
+    this.routes.clearLayers(); this.places.clearLayers(); this.trucks.clearLayers();
+    const shown = S.assignments.filter(a => only ? a.id === only : a.status === "DISPATCHED");
+    const pick = id => { if (only) return; SEL = SEL === id ? null : id; draw(true); };
+    for (const a of shown) {
+      const col = colorOf(a), faded = focus && a.id !== focus, w = a.id === focus ? 6 : 4;
+      const {done, rest} = a.stage === "IN_TRANSIT" ? splitRoute(a.route_id, a.route_done) : {done: [], rest: routeLegs(a.route_id).map(l => l.points)};
+      rest.forEach(pts => L.polyline(pts, {color: col, weight: w, opacity: faded ? 0.12 : 0.9, lineCap: "round"}).addTo(this.routes).on("click", e => { L.DomEvent.stop(e); pick(a.id); }));
+      done.forEach(pts => L.polyline(pts, {color: "#8b98a8", weight: w - 1, opacity: faded ? 0.08 : 0.6, dashArray: "1 7", lineCap: "round"}).addTo(this.routes));
+      if (a.relay && !faded) this.place(a.relay.point_id, `Relay: ${a.relay.driver_id} takes over`, true, "#a371f7");
+      if (a.id === focus) MAP.routes[a.route_id].waypoints.forEach((wp, i, arr) => { const end = i === 0 || i === arr.length - 1; this.place(wp.loc, (i === 0 ? "Pickup: " : end ? "Delivery: " : "") + short(wp.name), end, end ? "#e6edf3" : "#8b98a8"); });
+    }
+    if (!only) MAP.locations.filter(l => l.kind === "terminal").forEach(l => this.place(l.id, short(l.name), false, "#76b900"));
+    const placed = new Set();
+    for (const a of shown) { const pos = truckPos(a); if (!pos || !a.driver_id) continue; placed.add(a.driver_id); this.truck(pos, `${a.load_id} · ${a.driver_id}`, colorOf(a), focus && a.id !== focus, () => pick(a.id)); }
+    for (const d of S.drivers) {
+      if (placed.has(d.id) || d.lon < -83.8) continue;
+      const a = S.assignments.find(x => x.relay && x.relay.driver_id === d.id && x.status === "DISPATCHED");
+      if (only && (!a || a.id !== only)) continue;
+      let pos = [d.lat, d.lon];
+      if (a) { const path = repositionPath(d, a.relay.point_id); if (path) { if (!(focus && a.id !== focus)) L.polyline(path.points, {color: colorOf(a), weight: 3, opacity: 0.75, dashArray: "6 6"}).addTo(this.routes); pos = path.pos; } }
+      this.truck(pos, a ? `${d.id} → relay` : d.id, a ? colorOf(a) : COLORS.idle, focus && (!a || a.id !== focus), () => a ? pick(a.id) : (location.hash = `#/drivers/${d.id}`), !a);
+    }
+    const target = only || SEL || "ALL";
+    if (this.fitted !== target) {
+      const pts = []; (focus ? shown.filter(a => a.id === focus) : shown).forEach(a => routeLegs(a.route_id).forEach(l => l.points.forEach(q => pts.push(q))));
+      if (pts.length) this.map.fitBounds(L.latLngBounds(pts).pad(0.08), {animate: true, maxZoom: 10});
+      this.fitted = target;
+    }
+  }
+  place(locId, label, permanent, color) {
+    const l = MAP.locations.find(x => x.id === locId); if (!l) return;
+    L.circleMarker([l.lat, l.lon], {radius: 5, color: "#fff", weight: 2, fillColor: color, fillOpacity: 1}).addTo(this.places).bindTooltip(esc(label), {permanent, direction: "right", className: "place", offset: [6, 0]});
+  }
+  truck(pos, label, color, faded, onClick, idle) {
+    const icon = L.divIcon({className: `truck${faded ? " faded" : ""}${idle ? " idle" : ""}`, html: `<span style="background:${color}">${esc(label)}</span>`, iconSize: [0, 0]});
+    L.marker(pos, {icon, zIndexOffset: faded ? 0 : 1000}).addTo(this.trucks).on("click", e => { L.DomEvent.stop(e); onClick(); });
+  }
+}
+// Maps live outside the re-rendered HTML: each slot gets a persistent Leaflet instance moved back in after every render.
+const LMAPS = {};
+function lslot(key, height, opts = {}) { LMAPS[key] = LMAPS[key] || {opts, height}; LMAPS[key].opts = opts; return `<div class="lslot" data-lslot="${key}" style="height:${height}px"></div>`; }
+function mountSlots() {
+  document.querySelectorAll("[data-lslot]").forEach(slot => {
+    const k = slot.dataset.lslot, m = LMAPS[k];
+    if (!m.el) { m.el = document.createElement("div"); m.el.className = "lmap"; slot.appendChild(m.el); m.fm = new FleetMap(m.el, m.opts); }
+    else if (m.el.parentNode !== slot) slot.appendChild(m.el);
+    if (k === "overview") slot.insertAdjacentHTML("beforeend", `<div class="maplegend">${legendHTML()}</div>`);
+    m.fm.opts = m.opts; m.fm.map.invalidateSize(); m.fm.draw();
+  });
+}
+function legendHTML() {
+  const items = COLOR_BY === "hos" ? [["ok","90+ min legal time left"],["warn","30–90 min"],["bad","under 30 min"],["idle","idle driver"]]
+    : [["ok","on track"],["warn","at risk / data stale"],["bad","plan broken"],["idle","idle driver"]];
+  return `<div class="seg2"><button data-colorby="status" class="${COLOR_BY==="status"?"on":""}">Status</button><button data-colorby="hos" class="${COLOR_BY==="hos"?"on":""}">Legal hours left</button></div>${items.map(([k,t]) => `<div><i style="background:${COLORS[k]}"></i>${t}</div>`).join("")}`;
+}
+function selectedLoad(id) {
+  const a = S.assignments.find(x => x.id === id); if (!a) return "";
+  const inc = S.incidents.find(i => i.status === "OPEN" && i.assignment_id === id);
+  return `<div class="row" style="padding-top:10px;gap:16px"><b>${a.load_id}</b> ${esc(short(a.origin))} → ${esc(short(a.destination))} ${tag(a.verdict)}
+    <span class="muted">driver ${a.relay ? `${a.driver_id} → ${a.relay.driver_id}` : esc(a.driver_id || "–")} · arrives ${fmtT(a.delivery_eta)} · ${slackTag(a.slack)} · legal time left ${hm(a.reserve)}</span>
+    <a class="btn sm" href="#/loads/${a.id}">Open load</a>${inc ? `<a class="btn sm primary" href="#/incidents/${inc.id}">Resolve</a>` : ""}</div>`;
+}
+/* ---- schedule board ---- */
+function board(d, only) {
+  const rows = only ? d.drivers.filter(r => r.id === only) : d.drivers;
+  const now = +simNow();
+  let t0 = now - 3*3600e3, t1 = now + 15*3600e3;
+  rows.forEach(r => r.blocks.forEach(b => { t0 = Math.min(t0, +new Date(b.start)); t1 = Math.max(t1, +new Date(b.end)); }));
+  t0 = Math.max(t0, now - 6*3600e3); t1 = Math.min(t1, now + 26*3600e3);
+  const W = 1400, Lp = 210, R = 12, rowH = 38, top = 26, H = top + rows.length*rowH + 6, x = t => Lp + (Math.max(t0, Math.min(t1, t)) - t0) / (t1 - t0) * (W - Lp - R);
+  const ink = "fill:var(--text)", dim = "fill:var(--dim)";
+  let h = "";
+  for (let t = Math.ceil(t0/3600e3)*3600e3; t <= t1; t += 3600e3) {
+    const major = +new Date(t).toLocaleString("en-US", {timeZone: TZ, hour: "numeric", hour12: false}) % 3 === 0;
+    h += `<line x1="${x(t)}" x2="${x(t)}" y1="${top-4}" y2="${H}" style="stroke:var(--line2)" stroke-opacity="${major ? 1 : .5}"/>${major ? `<text x="${x(t)}" y="15" style="${dim}" font-size="11" text-anchor="middle">${fmtT(new Date(t).toISOString())}</text>` : ""}`;
+  }
+  (d.windows || []).forEach(w => {
+    const r = rows.findIndex(row => row.blocks.some(b => b.stop === "delivery" && b.load_id === w.load_id)); if (r < 0) return;
+    const y = top + r*rowH;
+    h += `<rect x="${x(+new Date(w.start))}" y="${y+2}" width="${Math.max(2, x(+new Date(w.end)) - x(+new Date(w.start)))}" height="${rowH-4}" fill="#2ea043" fill-opacity=".1" stroke="#2ea043" stroke-opacity=".45" stroke-dasharray="3 3"><title>${esc(w.load_id)} delivery window ${fmtT(w.start)}–${fmtT(w.end)}</title></rect>`;
+  });
+  rows.forEach((r, i) => {
+    const y = top + i*rowH;
+    const st = r.stale ? COLORS.warn : r.blocks.some(b => b.verdict === "FAIL") ? COLORS.bad : r.blocks.length ? COLORS.ok : COLORS.idle;
+    h += `<a href="#/drivers/${r.id}"><circle cx="10" cy="${y+rowH/2}" r="4" fill="${st}"/><text x="20" y="${y+16}" style="${ink}" font-size="12.5" font-weight="600">${esc(r.id)} ${esc(r.name)}</text>
+      <text x="20" y="${y+30}" style="${dim}" font-size="11">${esc(r.loads.join(", ") || r.availability)} · ${hm(r.drive_left)} driving left</text></a>`;
+    if (!r.blocks.length) h += `<text x="${Lp+6}" y="${y+23}" style="${dim}" font-size="11.5">${r.stale ? "Logbook stale: schedule unknown" : r.availability === "available" ? "Available" : esc(r.duty_status.replace("_", " ").toLowerCase())}</text>`;
+    r.blocks.forEach(b => {
+      const a = x(+new Date(b.start)), e = x(+new Date(b.end)); if (e - a < 0.5) return;
+      const col = b.stop === "break" ? "#a371f7" : b.stop === "reset" ? "#6e7681" : b.stop === "handoff" ? "#2ea043" : b.status === "DRIVING" ? "#2f81f7" : b.status === "ON_DUTY" ? "#d29922" : "#3a4553";
+      h += `<rect x="${a}" y="${y+8}" width="${Math.max(1.5, e-a)}" height="${rowH-16}" rx="4" fill="${col}" fill-opacity="${b.status === "OFF_DUTY" && !["break","reset"].includes(b.stop) ? .45 : .95}"><title>${esc(r.id)} · ${esc(b.load_id)} · ${esc(b.label)} · ${fmtT(b.start)}–${fmtT(b.end)}</title></rect>`;
+      if (e - a > 70 && b.status !== "OFF_DUTY") h += `<text x="${a+5}" y="${y+23}" fill="#fff" font-size="10.5" font-weight="600" pointer-events="none">${esc(b.label.slice(0, Math.floor((e-a)/6.2)))}</text>`;
+    });
+  });
+  h += `<line x1="${x(now)}" x2="${x(now)}" y1="${top-8}" y2="${H}" stroke="#f85149" stroke-width="1.5"/><text x="${x(now)+4}" y="${top-10}" fill="#f85149" font-size="10.5">now</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${h}</svg>
+    <div class="legend" style="margin-top:10px"><span><i style="background:#2f81f7"></i>driving</span><span><i style="background:#d29922"></i>on duty</span><span><i style="background:#a371f7"></i>30-min break</span><span><i style="background:#6e7681"></i>10-h rest</span><span><i style="background:#2ea043"></i>handoff</span><span><i style="background:#3a4553"></i>off duty</span></div>`;
+}
+function schedRow(id) { const d = need("schedule", "/api/schedule", 3000); return d && !d.__error ? board(d, id) : loading; }
 
 function gantt(timeline, opts={}) {
   if (!timeline || !timeline.length) return `<div class="empty">No timeline.</div>`;
@@ -207,7 +357,7 @@ PAGES.overview = {
     <div class="grid g-main">
       <div class="grid">
         ${card("Needs attention", incidentRows(open), `<a href="#/incidents">All incidents →</a>`, true)}
-        ${card("Live fleet", mapSVG(320) + `<div style="padding:8px 2px 0">${MAP_LEGEND}</div>`, `<a href="#/map">Open map →</a>`)}
+        ${card("Live fleet", lslot("overview", 520) + (SEL ? selectedLoad(SEL) : `<div class="muted small" style="padding-top:8px">Click a truck or route to focus it. Lines follow the real roads; dotted = already driven.</div>`), SEL ? `<a href="javascript:void 0" data-select="${SEL}">Show all loads</a>` : "")}
       </div>
       <div class="grid" style="align-content:start">
         ${card("Simulate an event", `<div class="muted small" style="margin-bottom:8px">Inject a scripted disruption. The monitor reevaluates within the same request.</div>
@@ -375,7 +525,8 @@ function driverDetail(id) {
         ${card("Hours of service (projected to now)", `${clockGauge("Drive left", r.drive_left, 660)}${clockGauge("Window left", r.window_left, 840)}${clockGauge(`Cycle left (${D.cycle_profile.replace("_","h/")}d)`, r.cycle_left, D.cycle_profile==="60_7"?3600:4200)}
           <div class="dim small" style="margin-top:6px">Computed by the deterministic HOS engine from the ELD snapshot below; no model involved.</div>`)}
         ${d.assignment ? card(`Current assignment: <a href="#/loads/${d.assignment.id}">${d.assignment.load_id}</a>`, loadsTable([d.assignment]), "", true) : card("Current assignment", `<div class="muted">Not on an active load.</div>`)}
-        ${card("Live position", mapSVG(260, id))}
+        ${d.assignment ? card("Live position", lslot("drv-" + id, 300, {only: d.assignment.id})) : ""}
+        ${card("Schedule", `<div class="board">${schedRow(id)}</div>`, `<a href="#/schedule">Whole fleet →</a>`)}
         ${card("Messages to driver", d.outbox.length ? d.outbox.map(o=>`<div class="small" style="padding:5px 0;border-bottom:1px solid var(--line2)">${tag(o.status)} <span class="mono dim">${fmtT(o.created_at)}</span> ${esc(o.body)}</div>`).join("") : `<div class="muted">None.</div>`)}
       </div>
       <div class="grid" style="align-content:start">
@@ -395,47 +546,6 @@ function driverDetail(id) {
     </div>`;
 }
 
-PAGES.map = {
-  crumbs: () => "Live map",
-  render() {
-    const act = S.assignments.filter(a => a.status==="DISPATCHED");
-    return `<div class="page-head"><div class="grow"><h1>Live fleet</h1><div class="sub">Positions come from mock ELD/GPS telemetry every 5 simulated minutes. Speed up the clock to watch loads move.</div></div>${MAP_LEGEND}</div>
-      <div class="grid g-main">
-        ${card("Network", mapSVG(560))}
-        <div class="grid" style="align-content:start">
-          ${card("Loads in motion", act.map(a => {
-            const prog = a.stage==="IN_TRANSIT" ? Math.round(100*a.route_done/a.route_total) : ["DELIVERED","AT_DELIVERY"].includes(a.stage) ? 100 : 0;
-            return `<div class="inc-row" data-href="#/loads/${a.id}"><div class="mono" style="min-width:60px"><b>${a.load_id}</b><div class="dim">${a.relay?`${a.driver_id}→${a.relay.driver_id}`:a.driver_id}</div></div>
-              <div class="grow">${esc(short(a.origin))} → ${esc(short(a.destination))}<div class="bar" style="margin-top:5px"><i style="width:${prog}%"></i></div></div>
-              <div style="text-align:right">${tag(a.verdict)}<div class="small mono" style="margin-top:3px">ETA ${fmtT(a.delivery_eta)}</div></div></div>`;
-          }).join("") || `<div class="empty">No active loads.</div>`, "", true)}
-          ${card("Drivers", S.drivers.map(d=>`<div class="inc-row" data-href="#/drivers/${d.id}"><span class="mono"><b>${d.id}</b></span><span class="grow">${esc(d.name)}<div class="dim small">${esc(short(d.location))}</div></span><span class="mono small">${d.duty_status.replace("_"," ")}</span></div>`).join(""), "", true)}
-        </div>
-      </div>`;
-  },
-};
-
-PAGES.assistant = {
-  crumbs: () => "Assistant",
-  render() {
-    return `<div class="page-head"><div class="grow"><h1>Assistant</h1><div class="sub">Qwen3.6 on local vLLM with read-only dispatch tools. Facts and math come from the deterministic engines; changes still need your approval.</div></div></div>
-    <div class="grid g-main">
-      ${card("Ask Dispatch Guardian", `<div class="chatlog" id="chatlog"></div>
-        <div class="chips">${["Why can't D-01 keep DG-204 as planned?","Who else could legally take DG-204, and what would it cost?","Which loads are at risk right now?","Explain DG-205's stale data problem","Execute the recommended plan for DG-I-0042"].map(q=>`<button class="chip" data-ask="${esc(q)}">${esc(q)}</button>`).join("")}</div>
-        <div class="row"><input id="chat-in" class="grow" placeholder="Ask about loads, drivers, incidents or options…"><button class="btn primary" id="chat-go">Ask</button></div>`, `<span id="chat-model"></span>`)}
-      <div class="grid" style="align-content:start">
-        ${card("Message intake (text)", `<div class="muted small" style="margin-bottom:8px">Paste a shipper call note, driver text or customer email. The local model returns a structured event with confidence; you decide whether to submit it.</div>
-          <textarea id="intake-text" placeholder="e.g. Buckeye just called, Marcus's reefer won't be loaded for another hour and 15"></textarea>
-          <div class="row" style="margin-top:8px"><button class="btn" id="intake-go">Parse with local model</button></div>`)}
-        ${card("Document intake (photo / scan)", `<div class="muted small" style="margin-bottom:8px">Upload a delay notice, BOL or appointment confirmation. Read by qwen3-vl on Ollama. The first call loads the model (about 40 s).</div>
-          <div class="drop"><input type="file" id="doc-file" accept="image/*"><div class="small" style="margin-top:6px">Sample: <a href="/static/samples/delay_notice_dg204.png" target="_blank">delay_notice_dg204.png</a></div></div>
-          <div class="row" style="margin-top:8px"><button class="btn" id="doc-go">Extract event</button></div>`)}
-        ${card("Proposed event", `<div id="intake-out"><div class="muted">Nothing parsed yet.</div></div>`)}
-      </div>
-    </div>`;
-  },
-  after() { renderChat(); renderIntake(); },
-};
 function renderChat() {
   const el = $("#chatlog"); if (!el) return;
   el.innerHTML = CHAT.length ? CHAT.map(m => m.role==="user" ? `<div class="msg user">${esc(m.text)}</div>` :
@@ -457,6 +567,15 @@ function renderIntake() {
       <div class="row" style="margin-top:10px"><button class="btn primary" id="intake-submit">Submit event</button><button class="btn ghost" id="intake-clear">Discard</button></div>`
     : `<div class="muted">No operational event found.</div><div class="dim small">${esc(x.reason||"")}</div>`;
 }
+
+PAGES.schedule = {
+  crumbs: () => "Schedule",
+  render() {
+    const d = need("schedule", "/api/schedule", 3000);
+    return `<div class="page-head"><div class="grow"><h1>Schedule</h1><div class="sub">Every driver's projected day: driving, duty, required breaks and rest, relay handoffs. Shaded = delivery window, red line = now. Click a driver to open them.</div></div></div>
+      ${card("Dispatch board", d ? (d.__error ? errBox(d) : `<div class="board">${board(d)}</div>`) : loading)}`;
+  },
+};
 
 PAGES.activity = {
   crumbs: r => "Activity & audit",
@@ -534,7 +653,7 @@ function draw(force=false) {
   $("#banner").innerHTML = showBanner ? `<div class="callout"><b>${tag(crit.severity)} ${esc(crit.id)}</b> ${esc(crit.title)} <a href="#/incidents/${crit.id}" style="margin-left:8px">Review →</a></div>` : "";
   const html = p.render(r);
   const pageKey = r.page + "/" + (r.id||"");
-  if (html === lastHtml && pageKey === lastPage && !force) return;
+  if (html === lastHtml && pageKey === lastPage && !force) { refreshMaps(); return; }
   const view = $("#view");
   const openD = new Set([...view.querySelectorAll("details[open][data-k]")].map(d => d.dataset.k));
   const vals = {}; view.querySelectorAll("input[id],textarea[id]").forEach(i => { if (i.type !== "file") vals[i.id] = i.value; });
@@ -546,8 +665,10 @@ function draw(force=false) {
   if (focus) { const el = document.getElementById(focus); if (el) el.focus(); }
   if (pageKey === lastPage) window.scrollTo(0, sy); else window.scrollTo(0, 0);
   lastHtml = html; lastPage = pageKey;
+  mountSlots();
   if (p.after) p.after(r);
 }
+function refreshMaps() { document.querySelectorAll("[data-lslot]").forEach(sl => { const m = LMAPS[sl.dataset.lslot]; if (m && m.fm) m.fm.draw(); }); }
 function tickClock() {
   if (!S) return;
   $("#clock").innerHTML = `${simNow().toLocaleString("en-US",{timeZone:TZ,weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false})}<small>ET · ${S.clock.paused?"paused":S.clock.speed+"×"}</small>`;
@@ -571,7 +692,14 @@ async function refresh() {
 
 /* ---------------------------------------------------------------- actions (event delegation) */
 document.addEventListener("click", async ev => {
-  const t = ev.target.closest("[data-href],[data-approve],[data-reject],[data-explain],[data-override],[data-trace],[data-scenario],[data-incfilter],[data-loadfilter],[data-ask],#chat-go,#intake-go,#doc-go,#intake-submit,#intake-clear,#reset-demo");
+  const t = ev.target.closest("[data-href],[data-approve],[data-reject],[data-explain],[data-override],[data-trace],[data-scenario],[data-incfilter],[data-loadfilter],[data-ask],[data-select],[data-colorby],[data-docktab],#chat-go,#intake-go,#doc-go,#intake-submit,#intake-clear,#reset-demo,#chat-fab,#dock-close,#theme");
+  if (!t) return;
+  if (t.id === "chat-fab") { openDock(true); return; }
+  if (t.id === "dock-close") { openDock(false); return; }
+  if (t.id === "theme") { setTheme(isLight() ? "dark" : "light"); return; }
+  if (t.dataset.docktab) { document.querySelectorAll("[data-docktab]").forEach(a => a.classList.toggle("on", a === t)); $("#dock-chat").hidden = t.dataset.docktab !== "chat"; $("#dock-intake").hidden = t.dataset.docktab !== "intake"; return; }
+  if (t.dataset.select) { SEL = SEL === t.dataset.select ? null : t.dataset.select; return draw(true); }
+  if (t.dataset.colorby) { COLOR_BY = t.dataset.colorby; return draw(true); }
   if (!t) return;
   if (t.dataset.href && !ev.target.closest("a")) { location.hash = t.dataset.href; return; }
   if (t.dataset.approve) {
@@ -614,7 +742,7 @@ document.addEventListener("click", async ev => {
     } catch (e) { toast(esc(e.message)); }
     t.disabled = false; invalidate("inc:"); return refresh();
   }
-  if (t.dataset.ask) { $("#chat-in").value = t.dataset.ask; return ask(); }
+  if (t.dataset.ask) { openDock(true); $("#chat-in").value = t.dataset.ask; return ask(); }
   if (t.id === "chat-go") return ask();
   if (t.id === "intake-go") {
     const text = $("#intake-text").value.trim(); if (!text) return;
@@ -657,7 +785,8 @@ async function ask() {
   const inp = $("#chat-in"), message = inp.value.trim(); if (!message) return;
   inp.value = "";
   CHAT.push({role:"user", text:message}); const pend = {role:"bot", text:"Thinking with local tools…", pending:true}; CHAT.push(pend); renderChat();
-  const incId = (S.incidents.find(i => i.status==="OPEN" && message.includes(i.id)) || {}).id;
+  const r0 = route();
+  const incId = (S.incidents.find(i => message.includes(i.id)) || {}).id || (r0.page === "incidents" && r0.id) || (S.incidents.find(i => i.status === "OPEN" && i.plans && i.plans.length) || {}).id;
   try {
     const r = await api("/api/agent/chat", {method:"POST", body:JSON.stringify({message, incident_id: incId || null})});
     Object.assign(pend, {text: r.answer, pending:false, steps: r.steps, model: r.model, elapsed: r.elapsed_s});
@@ -678,3 +807,17 @@ need("scen", "/api/scenarios", 1e9);
 refresh();
 setInterval(refresh, 2500);
 setInterval(tickClock, 500);
+
+/* ---- chat dock & theme ---- */
+function openDock(open) {
+  $("#dock").classList.toggle("open", open); $("#chat-fab").hidden = open;
+  if (open) { renderChat(); setTimeout(() => $("#chat-in").focus(), 50); }
+}
+$("#chips").innerHTML = ["What needs my attention right now?", "Why can't D-01 keep DG-204 as planned?", "Who else could legally take DG-204, and at what cost?", "Which drivers are closest to their hours limits?"]
+  .map(q => `<button class="chip" data-ask="${esc(q)}">${esc(q)}</button>`).join("");
+function setTheme(t) {
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem("dg.theme", t); } catch (_) {}
+  refreshMaps();
+}
+try { setTheme(localStorage.getItem("dg.theme") || "dark"); } catch (_) { setTheme("dark"); }

@@ -95,8 +95,39 @@ printf 'DG_API_TOKEN=%s\n' "$(grep ^DG_API_TOKEN= .env | cut -d= -f2-)" > integr
 nemoclaw dispatch-guardian skill install integrations/openclaw/dispatch-guardian
 ```
 
-Fallback: `app/integrations/slack_bridge.py` is a direct Socket Mode bridge (incident cards with Approve buttons).
-It turns on when `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN` and `SLACK_CHANNEL` are set. Don't run both on the same Slack app.
+### Incident alerts with buttons: second app "Dispatch Guardian Alerts"
+
+OpenClaw can render buttons, but its clicks go to the LLM agent (or need a custom gateway plugin), and cron needs an
+operator.admin scope. Alerts therefore come from a second, small Slack app driven by deterministic code:
+`app/integrations/slack_bridge.py` (Socket Mode, inside the API process). Two bots, one channel: Alerts posts cards,
+OpenClaw answers @mentions.
+
+- Each new incident is posted **once** as a compact card: cause in plain words ("D-01 would drive 41 min past the
+  14-hour duty window"), recommended fix, arrival and spare minutes, extra cost, legal time left, alternatives.
+  Revisions and status changes **edit the card** and add one note in its thread.
+- Buttons: **Approve recommended** (confirm dialog), **See options** (each option with its own Approve, in the thread),
+  **Explain** (local Qwen model), **Open dashboard** (`DG_PUBLIC_URL/#/incident/<id>`).
+- Every click approval runs `approve_from_slack()`: `service.approve_plan` (actor `slack:<user id>`) then
+  `execute_approved_plan`, which re-validates the hours rules before committing. A FAIL is reported, never executed.
+  Double clicks are idempotent. `SLACK_APPROVERS` limits who may approve.
+
+Setup (about 5 minutes):
+1. https://api.slack.com/apps → Create New App → From a manifest → paste `config/slack_app_manifest.yaml`.
+2. Install to the workspace (copy the `xoxb-` bot token). Basic Information → App-Level Tokens → generate one with
+   `connections:write` (the `xapp-` token).
+3. Add to `.env` (git-ignored):
+   ```
+   SLACK_BOT_TOKEN=xoxb-...
+   SLACK_APP_TOKEN=xapp-...
+   SLACK_CHANNEL=C0C627V9S4F
+   SLACK_APPROVERS=U0C628NKALF,U0C6BH448AF,U0C7C0BGZNU
+   DG_PUBLIC_URL=http://localhost:8090
+   ```
+4. `/invite @Dispatch Guardian Alerts` in the channel, then restart the API.
+
+Check: `GET /api/slack/status` (connection, cards posted), `GET /api/slack/incidents/<id>/card` (Block Kit JSON
+for the Block Kit Builder), `POST /api/slack/flush` or `/api/slack/incidents/<id>/post` (post now). The bridge also
+marks dispatcher notifications delivered, so OpenClaw's `dg.sh feed` won't repeat them.
 
 Other API endpoints: `GET /api/incidents`, `POST /api/plans/{id}/approve` and `/execute`, `POST /api/events`,
 `POST /api/intake/text`, `POST /api/intake/document`, `GET /api/incidents/{id}/trace`, `GET /api/outbox`.

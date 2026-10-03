@@ -1,12 +1,16 @@
+# "Dispatch Guardian Alerts": the second Slack app that posts incident cards with
+# Approve / See options / Explain buttons (app/integrations/slack_bridge.py).
+# Conversation (@mentions) stays with the OpenClaw bot; this app subscribes to no
+# message events, so the two bots never both answer.
 # Paste into https://api.slack.com/apps -> Create New App -> From a manifest.
 # Socket Mode: the GB10 connects out to Slack; no public URL or open port needed.
 display_information:
-  name: Dispatch Guardian
-  description: Always-on dispatch monitoring with human-approved recovery plans (runs locally on the GB10).
+  name: Dispatch Guardian Alerts
+  description: Incident alerts with human-approved recovery plans (runs locally on the GB10).
   background_color: "#0b0f15"
 features:
   bot_user:
-    display_name: Dispatch Guardian
+    display_name: Dispatch Guardian Alerts
     always_online: true
 oauth_config:
   scopes:
@@ -14,15 +18,7 @@ oauth_config:
       - chat:write
       - channels:read
       - groups:read
-      - app_mentions:read
-      - im:history
-      - im:read
-      - im:write
 settings:
-  event_subscriptions:
-    bot_events:
-      - app_mention
-      - message.im
   interactivity:
     is_enabled: true
   socket_mode_enabled: true
