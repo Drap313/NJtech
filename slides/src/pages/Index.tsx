@@ -73,13 +73,6 @@ const comparisonRows: { capability: string; values: ('yes' | 'no' | 'partial' | 
   { capability: 'Named approver + audit trail', values: ['no', 'partial', 'yes'] },
 ];
 
-const comparisonMetrics = [
-  { label: 'Cost', values: ['$19-50 /truck/mo + hardware', '$10K-100K+ to implement', '$29-39 /truck/mo, no hardware'] },
-  { label: 'Commitment', values: ['1-3 year contract', 'Multi-year', 'Month to month'] },
-  { label: 'Where the data lives', values: ['Vendor cloud', 'Vendor cloud', 'Your box'] },
-  { label: 'Time to a decision', values: ['—', '—', '1-5 minutes'] },
-];
-
 const ComparisonCell = ({ value, highlight }: { value: string; highlight?: boolean }) => {
   if (value === 'yes') {
     return <span className={`text-xl font-bold ${highlight ? 'text-primary' : 'text-foreground'}`}>✓</span>;
@@ -563,7 +556,7 @@ const Index = () => {
               Demo
             </h2>
 
-            <div className="mx-auto w-full max-w-3xl lg:max-w-4xl">
+            <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
               <ScreenshotSlot
                 label="Overview — the whole operation at once"
                 src="/demo-overlay.png"
@@ -590,11 +583,11 @@ const Index = () => {
 
         <Section id="approval" className="bg-transparent" contentClassName="max-w-7xl py-5">
           <div className="space-y-4">
-            <h2 className="text-center text-3xl font-black tracking-tight text-foreground md:text-5xl">
-              A 75-minute delay, <span className="text-primary">priced three ways</span>.
+            <h2 className="text-center text-4xl font-black tracking-tight text-foreground md:text-6xl">
+              Demo
             </h2>
 
-            <div className="mx-auto w-full max-w-3xl lg:max-w-4xl">
+            <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
               <ScreenshotSlot
                 label="Schedule — every driver's projected day, and the incident on it"
                 src="/demo-schedule.png"
@@ -655,14 +648,16 @@ const Index = () => {
                   whileInView={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.35, delay: 0.05 * rowIndex }}
                   viewport={{ once: false, amount: 0.3 }}
-                  className="grid grid-cols-[1.5fr_1fr_1fr_1.15fr] items-center gap-2 border-b border-border/40 px-4 py-2"
+                  className={`grid grid-cols-[1.5fr_1fr_1fr_1.15fr] items-center gap-2 px-5 py-3 ${
+                    rowIndex === comparisonRows.length - 1 ? '' : 'border-b border-border/40'
+                  }`}
                 >
-                  <div className="text-xs md:text-sm text-foreground">{row.capability}</div>
+                  <div className="text-sm md:text-base text-foreground">{row.capability}</div>
                   {row.values.map((value, i) => (
                     <div
                       key={i}
                       className={`flex items-center justify-center text-center ${
-                        i === 2 ? 'rounded-md bg-primary/10 py-1' : ''
+                        i === 2 ? 'rounded-md bg-primary/10 py-1.5' : ''
                       }`}
                     >
                       <ComparisonCell value={value} highlight={i === 2} />
@@ -671,27 +666,6 @@ const Index = () => {
                 </motion.div>
               ))}
 
-              {/* metrics */}
-              {comparisonMetrics.map((metric, rowIndex) => (
-                <div
-                  key={metric.label}
-                  className={`grid grid-cols-[1.5fr_1fr_1fr_1.15fr] items-center gap-2 px-4 py-2 ${
-                    rowIndex === 0 ? 'border-t border-border bg-muted/20' : 'bg-muted/20'
-                  } ${rowIndex === comparisonMetrics.length - 1 ? '' : 'border-b border-border/40'}`}
-                >
-                  <div className="text-xs md:text-sm font-semibold text-muted-foreground">{metric.label}</div>
-                  {metric.values.map((value, i) => (
-                    <div
-                      key={i}
-                      className={`text-center text-[0.7rem] md:text-xs leading-tight ${
-                        i === 2 ? 'rounded-md bg-primary/10 py-1 font-semibold text-foreground' : 'text-muted-foreground'
-                      }`}
-                    >
-                      {value}
-                    </div>
-                  ))}
-                </div>
-              ))}
             </div>
 
             <p className="mx-auto max-w-3xl text-center text-lg md:text-xl font-medium text-foreground">
