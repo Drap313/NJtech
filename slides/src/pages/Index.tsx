@@ -587,26 +587,34 @@ const Index = () => {
               Demo
             </h2>
 
-            <div className="mx-auto w-full max-w-2xl lg:max-w-3xl">
-              <ScreenshotSlot
-                label="Schedule — every driver's projected day, and the incident on it"
-                src="/demo-schedule.png"
-                className="aspect-video"
-              />
-            </div>
+            <div className="mx-auto grid w-full max-w-6xl items-center gap-5 lg:grid-cols-[2.5fr_1fr]">
+              <div className="space-y-4">
+                <ScreenshotSlot
+                  label="Schedule — every driver's projected day, and the incident on it"
+                  src="/demo-schedule.png"
+                  className="aspect-video"
+                />
+                <div className="grid gap-4 grid-cols-2">
+                  <ScreenshotSlot
+                    label="Incident detail"
+                    src="/demo-incident.png"
+                    caption="41 min over the 14-hour window"
+                    className="aspect-video"
+                  />
+                  <ScreenshotSlot
+                    label="Options compared"
+                    src="/demo-options.png"
+                    caption="Relay $286 · swap $411 · hold $1,200"
+                    className="aspect-video"
+                  />
+                </div>
+              </div>
 
-            <div className="grid gap-4 md:grid-cols-2 max-w-5xl mx-auto">
               <ScreenshotSlot
-                label="Incident detail"
-                src="/demo-incident.png"
-                caption="41 minutes over the 14-hour window"
-                className="aspect-video"
-              />
-              <ScreenshotSlot
-                label="Options compared"
-                src="/demo-options.png"
-                caption="Relay $286 · swap $411 · hold $1,200"
-                className="aspect-video"
+                label="Slack approval"
+                src="/demo-slack.png"
+                caption="Approved from a phone"
+                className="mx-auto h-[20rem] lg:h-[26rem] aspect-[1320/2868]"
               />
             </div>
           </div>
